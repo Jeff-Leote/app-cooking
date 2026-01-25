@@ -5,6 +5,12 @@
 // Constante pour le debounce de recherche
 const SEARCH_DEBOUNCE_MS = 300;
 
+function toSafePositiveIntId(value) {
+  const n = Number.parseInt(String(value), 10);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return n;
+}
+
 function createLoadingState() {
   const loadingDiv = document.createElement('div');
   loadingDiv.className = 'col-span-full text-center py-12 text-gray-500';
@@ -97,9 +103,15 @@ function buildApiUrl(state) {
 }
 
 function createRecipeCard(recipe, reloadRecipes) {
+  const recipeId = toSafePositiveIntId(recipe?.id);
+  if (recipeId == null) {
+    // Évite la construction d'URL avec une valeur non fiable.
+    return document.createElement('div');
+  }
+
   const card = document.createElement('div');
   card.className = 'recipe-card';
-  card.dataset.recipeId = recipe.id;
+  card.dataset.recipeId = String(recipeId);
 
   if (recipe.image_url) {
     const img = document.createElement('img');
@@ -129,7 +141,7 @@ function createRecipeCard(recipe, reloadRecipes) {
     pathD: 'M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z',
     onClick: (e) => {
       e.stopPropagation();
-      window.location.href = `/recipes/${recipe.id}/edit`;
+      window.location.href = `/recipes/${recipeId}/edit`;
     },
   });
 
@@ -142,7 +154,7 @@ function createRecipeCard(recipe, reloadRecipes) {
       const ok = window.confirm('Supprimer cette recette ?');
       if (!ok) return;
       try {
-        const res = await fetch(`/api/recipes/${recipe.id}`, {
+        const res = await fetch(`/api/recipes/${recipeId}`, {
           method: 'DELETE',
           headers: { Accept: 'application/json' },
         });
@@ -176,7 +188,7 @@ function createRecipeCard(recipe, reloadRecipes) {
   card.appendChild(content);
 
   card.addEventListener('click', () => {
-    window.location.href = `/recipes/${recipe.id}/edit`;
+    window.location.href = `/recipes/${recipeId}/edit`;
   });
 
   return card;
@@ -197,9 +209,7 @@ function renderRecipes(container, recipes, reloadRecipes) {
   });
 }
 
-/**
- * Initialise la page des recettes
- */
+
 export function initRecipesPage() {
   const container = document.getElementById('recipes-container');
   if (!container) return;
@@ -261,7 +271,7 @@ export function initRecipesPage() {
     }
   }
 
-  // Gestion des filtres par catégorie
+
   filterButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       // Retirer la classe active de tous les boutons

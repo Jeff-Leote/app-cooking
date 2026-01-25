@@ -38,9 +38,8 @@ jobs:
       - name: Générer Prisma Client
         run: npx prisma generate
         env:
-          # URL factice pour Prisma (generate n'a pas besoin de se connecter à la DB),
-          # et sans mot de passe en clair dans le dépôt.
-          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://postgres@localhost:5432/test_db?schema=public' }}
+          # Fourni via GitHub Secrets (Settings → Secrets and variables → Actions)
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       # Étape 5 : Compiler le code TypeScript
       - run: npm run build

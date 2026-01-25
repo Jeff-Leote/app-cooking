@@ -58,9 +58,8 @@ services:
     environment:
       # Variables d'environnement chargées depuis .env.backend
       NODE_ENV: ${NODE_ENV}
-      # IMPORTANT: dans Docker, "localhost" pointe vers le conteneur lui-même.
-      # On force donc la connexion via le service "postgres" (réseau docker) sur le port interne 5432.
-      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DATABASE}?schema=public"
+      # Fourni via .env (non versionné) pour éviter d'exposer la structure et les credentials.
+      DATABASE_URL: ${DATABASE_URL_BACKEND}
       PORT: 3000
     ports:
       # Nest.js sera accessible sur localhost:3000
@@ -93,8 +92,8 @@ services:
       # Variables d'environnement chargées depuis .env.frontend
       APP_ENV: ${APP_ENV}
       APP_SECRET: ${APP_SECRET}
-      # Doctrine/Symfony doit aussi utiliser le service "postgres" en interne Docker.
-      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DATABASE}?serverVersion=16&charset=utf8"
+      # Fourni via .env (non versionné) pour éviter d'exposer la structure et les credentials.
+      DATABASE_URL: ${DATABASE_URL_FRONTEND}
     # PHP-FPM écoute sur le port 9000 (interne, pas exposé)
     # Il est accessible uniquement via Nginx
     volumes:

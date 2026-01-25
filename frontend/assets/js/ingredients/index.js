@@ -1,5 +1,11 @@
 const SEARCH_DEBOUNCE_MS = 300;
 
+function toSafePositiveIntId(value) {
+  const n = Number.parseInt(String(value), 10);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return n;
+}
+
 function setupFilters(container, state, loadIngredients) {
   const filterButtons = document.querySelectorAll('.ingredient-filter-btn');
   if (filterButtons.length === 0) {
@@ -130,9 +136,15 @@ function createIconButton({ title, className, pathD, onClick }) {
 }
 
 function createIngredientCard(ingredient, reloadIngredients) {
+  const ingredientId = toSafePositiveIntId(ingredient?.id);
+  if (ingredientId == null) {
+    // Évite la construction d'URL avec une valeur non fiable.
+    return document.createElement('div');
+  }
+
   const card = document.createElement('div');
   card.className = 'ingredient-card recipe-card';
-  card.dataset.ingredientId = ingredient.id;
+  card.dataset.ingredientId = String(ingredientId);
 
   const content = document.createElement('div');
   content.className = 'ingredient-card__content p-4';
@@ -154,7 +166,7 @@ function createIngredientCard(ingredient, reloadIngredients) {
     pathD: 'M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z',
     onClick: (e) => {
       e.stopPropagation();
-      window.location.href = `/ingredients/${ingredient.id}/edit`;
+      window.location.href = `/ingredients/${ingredientId}/edit`;
     },
   });
 
@@ -167,7 +179,7 @@ function createIngredientCard(ingredient, reloadIngredients) {
       const ok = window.confirm('Supprimer cet ingrédient ?');
       if (!ok) return;
       try {
-        const res = await fetch(`/api/ingredients/${ingredient.id}`, {
+        const res = await fetch(`/api/ingredients/${ingredientId}`, {
           method: 'DELETE',
           headers: { Accept: 'application/json' },
         });
@@ -234,7 +246,7 @@ function createIngredientCard(ingredient, reloadIngredients) {
   card.appendChild(content);
 
   card.addEventListener('click', () => {
-    window.location.href = `/ingredients/${ingredient.id}/edit`;
+    window.location.href = `/ingredients/${ingredientId}/edit`;
   });
 
   return card;
