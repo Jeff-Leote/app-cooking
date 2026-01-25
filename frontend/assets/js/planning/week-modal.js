@@ -34,10 +34,7 @@ export function initWeekModal(onWeekSelect) {
   let calendarMonth = new Date().getMonth();
   let currentStartDate = null;
   
-  /**
-   * Crée un bouton de jour pour le calendrier
-   */
-  function createCalendarDay(year, month, day, isOtherMonth, selectedMonday) {
+  function createCalendarDayButton(year, month, day, isOtherMonth, selectedMonday) {
     const dayEl = document.createElement('button');
     dayEl.type = 'button';
     dayEl.className = 'p-2 text-sm rounded-lg hover:bg-gray-100 transition-colors';
@@ -70,10 +67,7 @@ export function initWeekModal(onWeekSelect) {
     return dayEl;
   }
   
-  /**
-   * Rend le calendrier du modal
-   */
-  function renderCalendar(selectedMonday) {
+  function renderWeekCalendar(selectedMonday) {
     if (!calendarGrid || !calendarMonthYear) return;
     
     // Vider le calendrier
@@ -100,13 +94,13 @@ export function initWeekModal(onWeekSelect) {
     
     for (let i = firstDay - 1; i >= 0; i--) {
       const day = daysInPrevMonth - i;
-      const dayEl = createCalendarDay(prevYear, prevMonth, day, true, selectedMonday);
+      const dayEl = createCalendarDayButton(prevYear, prevMonth, day, true, selectedMonday);
       calendarGrid.appendChild(dayEl);
     }
     
     // Jours du mois actuel
     for (let day = 1; day <= daysInMonth; day++) {
-      const dayEl = createCalendarDay(calendarYear, calendarMonth, day, false, selectedMonday);
+      const dayEl = createCalendarDayButton(calendarYear, calendarMonth, day, false, selectedMonday);
       calendarGrid.appendChild(dayEl);
     }
     
@@ -117,7 +111,7 @@ export function initWeekModal(onWeekSelect) {
     const nextYear = calendarMonth === MONTHS_PER_YEAR - 1 ? calendarYear + 1 : calendarYear;
     
     for (let day = 1; day <= remainingCells; day++) {
-      const dayEl = createCalendarDay(nextYear, nextMonth, day, true, selectedMonday);
+      const dayEl = createCalendarDayButton(nextYear, nextMonth, day, true, selectedMonday);
       calendarGrid.appendChild(dayEl);
     }
     
@@ -135,7 +129,7 @@ export function initWeekModal(onWeekSelect) {
     calendarYear = startDate.getFullYear();
     calendarMonth = startDate.getMonth();
     const selectedMonday = getMondayOfWeek(startDate);
-    renderCalendar(selectedMonday);
+    renderWeekCalendar(selectedMonday);
     weekModal.classList.remove('hidden');
   }
   
@@ -155,7 +149,7 @@ export function initWeekModal(onWeekSelect) {
         calendarYear--;
       }
       const selectedMonday = currentStartDate ? getMondayOfWeek(currentStartDate) : null;
-      renderCalendar(selectedMonday);
+      renderWeekCalendar(selectedMonday);
     });
   }
   
@@ -167,7 +161,7 @@ export function initWeekModal(onWeekSelect) {
         calendarYear++;
       }
       const selectedMonday = currentStartDate ? getMondayOfWeek(currentStartDate) : null;
-      renderCalendar(selectedMonday);
+      renderWeekCalendar(selectedMonday);
     });
   }
   

@@ -10,6 +10,19 @@ import { initWeekModal } from './week-modal.js';
 import { initRecipeModal } from './recipe-modal.js';
 import { createFilledMealSlot } from './dom.js';
 
+function createMealFromRecipe(recipe) {
+  return {
+    recipe_id: recipe.id,
+    recipe_title: recipe.titre,
+    recipe_image: recipe.image_url,
+    prep_time: recipe.temps_preparation || 0,
+  };
+}
+
+function getDayIndexFromSlotId(slotId) {
+  return parseInt(slotId.match(/\d+/)?.[0] || '0');
+}
+
 /**
  * Initialise la page de planification
  */
@@ -30,6 +43,24 @@ export function initPlanningPage() {
   let isEditMode = false;
   let recipeModal = null;
   
+  async function updateWeek() {
+    updateWeekSelector(weekText, startDate);
+    const meals = await loadMealsForWeek(startDate);
+    renderWeekGrid(grid, startDate, meals, handleSlotClick);
+    updateStatistics(meals);
+  }
+
+  function safeUpdateWeek() {
+    void updateWeek().catch((err) => console.error('Erreur updateWeek:', err));
+  }
+
+  // Gestionnaire de clic sur un slot
+  function handleSlotClick(slotId, mealType, date, meal) {
+    if (isEditMode && recipeModal) {
+      recipeModal.open(slotId, mealType, date, meal);
+    }
+  }
+
   // Gestionnaire de sélection de recette
   function handleRecipeSelect(recipe, slotId, mealType, date) {
     if (!slotId || !mealType || !date) return;
@@ -39,13 +70,8 @@ export function initPlanningPage() {
     if (!slotElement) return;
     
     // Créer un nouveau slot rempli avec la recette
-    const dayIndex = parseInt(slotId.match(/\d+/)?.[0] || '0');
-    const meal = {
-      recipe_id: recipe.id,
-      recipe_title: recipe.titre,
-      recipe_image: recipe.image_url,
-      prep_time: recipe.temps_preparation || 0
-    };
+    const dayIndex = getDayIndexFromSlotId(slotId);
+    const meal = createMealFromRecipe(recipe);
     
     const newSlot = createFilledMealSlot(dayIndex, mealType, date, meal, handleSlotClick);
     
@@ -55,14 +81,7 @@ export function initPlanningPage() {
       parent.replaceChild(newSlot, slotElement);
     }
     
-    void updateWeek();
-  }
-  
-  // Gestionnaire de clic sur un slot
-  function handleSlotClick(slotId, mealType, date, meal) {
-    if (isEditMode && recipeModal) {
-      recipeModal.open(slotId, mealType, date, meal);
-    }
+    safeUpdateWeek();
   }
   
   const weekModal = initWeekModal(async (selectedDate) => {
@@ -75,13 +94,6 @@ export function initPlanningPage() {
   // Exporter la fonction pour l'utiliser dans les slots
   if (recipeModal && recipeModal.open) {
     window.openRecipeModal = recipeModal.open;
-  }
-  
-  async function updateWeek() {
-    updateWeekSelector(weekText, startDate);
-    const meals = await loadMealsForWeek(startDate);
-    renderWeekGrid(grid, startDate, meals, handleSlotClick);
-    updateStatistics(meals);
   }
   
   if (prevWeekBtn) {
@@ -130,5 +142,5 @@ export function initPlanningPage() {
     });
   }
   
-  void updateWeek();
+  safeUpdateWeek();
 }

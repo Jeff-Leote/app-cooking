@@ -72,7 +72,15 @@ function createErrorState() {
   return container;
 }
 
-function createRecipeCard(recipe, onRecipeSelect, currentSelectedSlot, currentSelectedMealType, currentSelectedDate, close) {
+function createRecipeCard(recipe, ctx) {
+  const {
+    onRecipeSelect,
+    currentSelectedSlot,
+    currentSelectedMealType,
+    currentSelectedDate,
+    close,
+  } = ctx || {};
+
   const card = document.createElement('div');
   card.className = 'recipe-card cursor-pointer';
   
@@ -234,7 +242,13 @@ export function initRecipeModal(onRecipeSelect) {
     grid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4';
     
     recipes.forEach(recipe => {
-      const card = createRecipeCard(recipe, onRecipeSelect, currentSelectedSlot, currentSelectedMealType, currentSelectedDate, close);
+      const card = createRecipeCard(recipe, {
+        onRecipeSelect,
+        currentSelectedSlot,
+        currentSelectedMealType,
+        currentSelectedDate,
+        close,
+      });
       grid.appendChild(card);
     });
     
@@ -260,7 +274,7 @@ export function initRecipeModal(onRecipeSelect) {
       }
     });
     
-    loadRecipes();
+    void loadRecipes().catch((err) => console.error('Erreur loadRecipes:', err));
     recipeModal.classList.remove('hidden');
   }
   
@@ -276,7 +290,7 @@ export function initRecipeModal(onRecipeSelect) {
       recipeFilterButtons.forEach(b => b.classList.remove('active-filter'));
       btn.classList.add('active-filter');
       currentRecipeCategory = btn.dataset.category || 'all';
-      loadRecipes();
+      void loadRecipes().catch((err) => console.error('Erreur loadRecipes:', err));
     });
   });
   
@@ -286,7 +300,7 @@ export function initRecipeModal(onRecipeSelect) {
       clearTimeout(searchTimeout);
       currentRecipeSearch = e.target.value.trim();
       searchTimeout = setTimeout(() => {
-        loadRecipes();
+        void loadRecipes().catch((err) => console.error('Erreur loadRecipes:', err));
       }, SEARCH_DEBOUNCE_MS);
     });
   }

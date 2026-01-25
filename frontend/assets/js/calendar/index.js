@@ -44,7 +44,7 @@ export function initCalendarPage() {
         currentMonth = MONTHS_PER_YEAR - 1;
         currentYear--;
       }
-      void updateCalendar();
+      void updateCalendar().catch((err) => console.error('Erreur updateCalendar:', err));
     });
   }
 
@@ -55,7 +55,7 @@ export function initCalendarPage() {
         currentMonth = 0;
         currentYear++;
       }
-      void updateCalendar();
+      void updateCalendar().catch((err) => console.error('Erreur updateCalendar:', err));
     });
   }
 
@@ -64,9 +64,9 @@ export function initCalendarPage() {
       const today = new Date();
       currentMonth = today.getMonth();
       currentYear = today.getFullYear();
-      void updateCalendar();
+      void updateCalendar().catch((err) => console.error('Erreur updateCalendar:', err));
     });
   }
 
-  void updateCalendar();
+  void updateCalendar().catch((err) => console.error('Erreur updateCalendar:', err));
 }

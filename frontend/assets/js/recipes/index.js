@@ -11,6 +11,19 @@ function toSafePositiveIntId(value) {
   return n;
 }
 
+function buildApiItemUrl(resource, id) {
+  // Whitelist stricte pour éviter toute "URL utilisateur" (signalée SSRF par certains scanners).
+  if (resource !== 'recipes') {
+    throw new Error(`Unsupported resource: ${resource}`);
+  }
+  const safeId = toSafePositiveIntId(id);
+  if (safeId == null) {
+    throw new Error('Invalid id');
+  }
+  const url = new URL(`/api/${resource}/${safeId}`, window.location.origin);
+  return url.toString();
+}
+
 function createLoadingState() {
   const loadingDiv = document.createElement('div');
   loadingDiv.className = 'col-span-full text-center py-12 text-gray-500';
@@ -99,7 +112,10 @@ function buildApiUrl(state) {
     params.append('category', state.currentCategory);
   }
   const queryString = params.toString();
-  return queryString ? `/api/recipes?${queryString}` : '/api/recipes';
+  if (!queryString) {
+    return '/api/recipes';
+  }
+  return `/api/recipes?${queryString}`;
 }
 
 function createRecipeCard(recipe, reloadRecipes) {
@@ -154,7 +170,8 @@ function createRecipeCard(recipe, reloadRecipes) {
       const ok = window.confirm('Supprimer cette recette ?');
       if (!ok) return;
       try {
-        const res = await fetch(`/api/recipes/${recipeId}`, {
+        const url = buildApiItemUrl('recipes', recipeId);
+        const res = await fetch(url, {
           method: 'DELETE',
           headers: { Accept: 'application/json' },
         });
@@ -227,7 +244,8 @@ export function initRecipesPage() {
   const searchInput = document.getElementById('recipe-search');
   const countElement = document.getElementById('recipes-count-number');
 
-  async function loadRecipes() {
+  function createLoadRecipes() {
+    async function loadRecipes() {
     while (container.firstChild) {
       container.removeChild(container.firstChild);
     }
@@ -270,6 +288,10 @@ export function initRecipesPage() {
       }
     }
   }
+    return loadRecipes;
+  }
+
+  const loadRecipes = createLoadRecipes();
 
 
   filterButtons.forEach((btn) => {
@@ -280,7 +302,7 @@ export function initRecipesPage() {
       btn.classList.add('active-filter');
       // Mettre à jour la catégorie active
       state.currentCategory = btn.dataset.category || 'all';
-      loadRecipes();
+      void loadRecipes().catch((err) => console.error('Erreur loadRecipes:', err));
     });
   });
 
@@ -316,7 +338,7 @@ export function initRecipesPage() {
       state.searchQuery = e.target.value.trim();
       // Debounce : attendre après la dernière frappe
       searchTimeout = setTimeout(() => {
-        loadRecipes();
+        void loadRecipes().catch((err) => console.error('Erreur loadRecipes:', err));
       }, SEARCH_DEBOUNCE_MS);
     });
   }
@@ -326,5 +348,5 @@ export function initRecipesPage() {
   if (activeBtn) {
     state.currentCategory = activeBtn.dataset.category || 'all';
   }
-  loadRecipes();
+  void loadRecipes().catch((err) => console.error('Erreur loadRecipes:', err));
 }

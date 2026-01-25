@@ -4,12 +4,12 @@ import { PrismaService } from '../prisma/prisma.service';
 
 type PeriodKind = 'firstHalf' | 'secondHalf';
 
-function pad2(n: number) {
+function padTo2Digits(n: number) {
   return n.toString().padStart(2, '0');
 }
 
 function formatLocalDate(d: Date) {
-  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  return `${d.getFullYear()}-${padTo2Digits(d.getMonth() + 1)}-${padTo2Digits(d.getDate())}`;
 }
 
 function startOfLocalDay(d: Date) {

@@ -68,7 +68,7 @@ export class MealPlanService {
   }
 
   async update(id: number, updateMealPlanDto: UpdateMealPlanDto) {
-    const mealPlan = await this.findOne(id);
+    await this.findOne(id);
 
     const updateData: any = {};
     if (updateMealPlanDto.date) {
@@ -95,7 +95,7 @@ export class MealPlanService {
   }
 
   async remove(id: number) {
-    const mealPlan = await this.findOne(id);
+    await this.findOne(id);
 
     const args = {
       where: { id },

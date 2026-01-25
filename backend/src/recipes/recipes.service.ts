@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class RecipesService {
@@ -13,10 +14,9 @@ export class RecipesService {
   }
 
   async findAll(filters?: { category?: string; search?: string; favorites?: boolean }) {
-    const where: any = {};
+    const where: Prisma.RecipeWhereInput = {};
 
-    const hasFavorites = filters?.favorites === true;
-    if (hasFavorites) {
+    if (filters?.favorites === true) {
       where.is_favorite = true;
     }
 
@@ -63,7 +63,7 @@ export class RecipesService {
   }
 
   async update(id: number, updateRecipeDto: UpdateRecipeDto) {
-    const recipe = await this.findOne(id);
+    await this.findOne(id);
 
     const args = {
       where: { id },
@@ -73,7 +73,7 @@ export class RecipesService {
   }
 
   async remove(id: number) {
-    const recipe = await this.findOne(id);
+    await this.findOne(id);
 
     const args = { where: { id } };
     return this.prisma.recipe.delete(args);

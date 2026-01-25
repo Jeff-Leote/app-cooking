@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateIngredientDto } from './dto/create-ingredient.dto';
 import { UpdateIngredientDto } from './dto/update-ingredient.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class IngredientsService {
@@ -21,23 +22,23 @@ export class IngredientsService {
     riche_fibres?: boolean;
     riche_vitamines?: boolean;
   }) {
-    const where: any = {};
+    const where: Prisma.IngredientWhereInput = {};
 
     if (filters?.search) {
       where.nom = { contains: filters.search };
     }
 
-    const nutritionalFilters = [
-      { key: 'sans_lactose', prop: 'sans_lactose' },
-      { key: 'sans_gluten', prop: 'sans_gluten' },
-      { key: 'riche_proteines', prop: 'riche_proteines' },
-      { key: 'riche_fibres', prop: 'riche_fibres' },
-      { key: 'riche_vitamines', prop: 'riche_vitamines' },
+    const nutritionalProps: Array<keyof Prisma.IngredientWhereInput> = [
+      'sans_lactose',
+      'sans_gluten',
+      'riche_proteines',
+      'riche_fibres',
+      'riche_vitamines',
     ];
 
-    nutritionalFilters.forEach(filter => {
-      if (filters?.[filter.prop] === true) {
-        where[filter.prop] = true;
+    nutritionalProps.forEach((prop) => {
+      if ((filters as any)?.[prop] === true) {
+        (where as any)[prop] = true;
       }
     });
 
