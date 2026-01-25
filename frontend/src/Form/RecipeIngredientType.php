@@ -66,9 +66,6 @@ class RecipeIngredientType extends AbstractType
         $choices = [];
         foreach ($ingredients as $ingredient) {
             $label = $ingredient['nom'] ?? '';
-            if (isset($ingredient['unite']) && $ingredient['unite']) {
-                $label .= ' (' . $ingredient['unite'] . ')';
-            }
             $choices[$label] = $ingredient['id'] ?? null;
         }
         return $choices;

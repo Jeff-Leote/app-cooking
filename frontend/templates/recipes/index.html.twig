@@ -9,6 +9,20 @@
                 <span id="recipes-count-number">0</span> recette(s) trouvée(s)
             </p>
         {% endblock %}
+
+        {% block header_search %}
+            <div class="relative w-full md:col-start-2 md:justify-self-center">
+                <input
+                    type="text"
+                    id="recipe-search"
+                    placeholder="Rechercher une recette..."
+                    class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent"
+                >
+                <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+        {% endblock %}
         
         {% block header_actions %}
             <a 

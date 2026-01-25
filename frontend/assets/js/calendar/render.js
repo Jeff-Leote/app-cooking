@@ -23,7 +23,7 @@ export function renderPreviousMonthDays(grid, currentYear, currentMonth, firstDa
 
   for (let i = firstDay - 1; i >= 0; i--) {
     const day = daysInPrevMonth - i;
-    const dayEl = createDayElement(prevYear, prevMonth, day, true, false, null);
+    const dayEl = createDayElement({ year: prevYear, month: prevMonth, day, isOtherMonth: true, isTodayDay: false, onDayClick: null });
     grid.appendChild(dayEl);
   }
 }
@@ -34,7 +34,7 @@ export function renderPreviousMonthDays(grid, currentYear, currentMonth, firstDa
 export function renderCurrentMonthDays(grid, currentYear, currentMonth, daysInMonth, onDayClick) {
   for (let day = 1; day <= daysInMonth; day++) {
     const isTodayDay = isTodayDate(currentYear, currentMonth, day);
-    const dayEl = createDayElement(currentYear, currentMonth, day, false, isTodayDay, onDayClick);
+    const dayEl = createDayElement({ year: currentYear, month: currentMonth, day, isOtherMonth: false, isTodayDay, onDayClick });
     grid.appendChild(dayEl);
   }
 }
@@ -49,7 +49,7 @@ export function renderNextMonthDays(grid, currentYear, currentMonth, totalCells)
   for (let day = 1; day <= remainingCells; day++) {
     const nextMonth = currentMonth === MONTHS_PER_YEAR - 1 ? 0 : currentMonth + 1;
     const nextYear = currentMonth === MONTHS_PER_YEAR - 1 ? currentYear + 1 : currentYear;
-    const dayEl = createDayElement(nextYear, nextMonth, day, true, false, null);
+    const dayEl = createDayElement({ year: nextYear, month: nextMonth, day, isOtherMonth: true, isTodayDay: false, onDayClick: null });
     grid.appendChild(dayEl);
   }
 }

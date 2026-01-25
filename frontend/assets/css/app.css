@@ -223,6 +223,36 @@ body {
   @apply w-full h-full flex items-center justify-center text-gray-300 hover:text-primary-green transition-colors;
 }
 
+/* Responsive (mobile) - Header & pages Calendrier/Planification */
+@media (max-width: 767px) {
+  /* Réduire uniquement les boutons verts du header sur mobile */
+  header a.bg-primary-green,
+  header button.bg-primary-green {
+    padding: 0.5rem 0.75rem; /* py-2 px-3 */
+    font-size: 0.875rem; /* text-sm */
+    line-height: 1.25rem;
+    gap: 0.5rem;
+  }
+
+  header a.bg-primary-green svg,
+  header button.bg-primary-green svg {
+    width: 1rem;  /* w-4 */
+    height: 1rem; /* h-4 */
+  }
+
+  /* Calendrier: cellules moins "massives" sur mobile */
+  .calendar-day {
+    padding: 0.5rem; /* p-2 */
+    min-height: 84px;
+  }
+
+  .calendar-day__number {
+    margin-bottom: 0.25rem;
+    font-size: 0.75rem; /* text-xs-ish */
+    line-height: 1rem;
+  }
+}
+
 /* Page Planification */
 .planning-day-column {
   @apply flex flex-col gap-3;

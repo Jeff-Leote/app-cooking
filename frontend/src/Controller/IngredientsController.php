@@ -42,18 +42,21 @@ class IngredientsController extends AbstractController
             $data = $form->getData();
             
             try {
-                // Envoyer les données à l'API backend
-                $response = $this->httpClient->request('POST', "{$this->getBackendUrl()}/api/ingredients", [
+                $backendUrl = $this->getBackendUrl();
+                $response = $this->httpClient->request('POST', "{$backendUrl}/api/ingredients", [
                     'json' => $data,
                     'headers' => [
                         'Content-Type' => 'application/json',
                     ],
+                    'timeout' => 30,
                 ]);
 
                 if ($response->getStatusCode() === 201) {
                     $this->addFlash('success', 'Ingrédient créé avec succès !');
                     return $this->redirectToRoute('app_ingredients');
                 }
+            } catch (\Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface $e) {
+                $this->addFlash('error', 'Impossible de se connecter au backend. Vérifiez que le service backend est démarré.');
             } catch (\Exception $e) {
                 $this->addFlash('error', 'Erreur lors de la création de l\'ingrédient : ' . $e->getMessage());
             }
@@ -69,9 +72,14 @@ class IngredientsController extends AbstractController
     public function edit(int $id, Request $request): Response
     {
         try {
-            // Récupérer l'ingrédient depuis l'API
-            $response = $this->httpClient->request('GET', "{$this->getBackendUrl()}/api/ingredients/{$id}");
+            $backendUrl = $this->getBackendUrl();
+            $response = $this->httpClient->request('GET', "{$backendUrl}/api/ingredients/{$id}", [
+                'timeout' => 30,
+            ]);
             $ingredient = $response->toArray();
+        } catch (\Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface $e) {
+            $this->addFlash('error', 'Impossible de se connecter au backend. Vérifiez que le service backend est démarré.');
+            return $this->redirectToRoute('app_ingredients');
         } catch (\Exception $e) {
             $this->addFlash('error', 'Ingrédient introuvable');
             return $this->redirectToRoute('app_ingredients');
@@ -87,18 +95,21 @@ class IngredientsController extends AbstractController
             $data = $form->getData();
             
             try {
-                // Mettre à jour l'ingrédient via l'API
-                $response = $this->httpClient->request('PATCH', "{$this->getBackendUrl()}/api/ingredients/{$id}", [
+                $backendUrl = $this->getBackendUrl();
+                $response = $this->httpClient->request('PATCH', "{$backendUrl}/api/ingredients/{$id}", [
                     'json' => $data,
                     'headers' => [
                         'Content-Type' => 'application/json',
                     ],
+                    'timeout' => 30,
                 ]);
 
                 if ($response->getStatusCode() === 200) {
                     $this->addFlash('success', 'Ingrédient modifié avec succès !');
                     return $this->redirectToRoute('app_ingredients');
                 }
+            } catch (\Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface $e) {
+                $this->addFlash('error', 'Impossible de se connecter au backend. Vérifiez que le service backend est démarré.');
             } catch (\Exception $e) {
                 $this->addFlash('error', 'Erreur lors de la modification de l\'ingrédient : ' . $e->getMessage());
             }

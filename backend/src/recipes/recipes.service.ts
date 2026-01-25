@@ -27,7 +27,7 @@ export class RecipesService {
       ];
     }
 
-    const args = {
+    return this.prisma.recipe.findMany({
       where,
       orderBy: {
         created_at: 'desc',
@@ -39,9 +39,7 @@ export class RecipesService {
           },
         },
       },
-    } as const;
-
-    return this.prisma.recipe.findMany(args);
+    });
   }
 
   async findOne(id: number) {

@@ -27,7 +27,6 @@ model Recipe {
 model Ingredient {
   id                Int                @id @default(autoincrement())
   nom               String              @db.VarChar(255)
-  unite             String?             @db.VarChar(50)
   sans_lactose      Boolean?            @default(false)
   sans_gluten       Boolean?            @default(false)
   riche_proteines   Boolean?            @default(false)

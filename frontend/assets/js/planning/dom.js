@@ -1,17 +1,73 @@
-// ============================================
-// Module DOM - Création d'éléments DOM pour la planification
-// ============================================
-
 import { formatDateString, formatDayHeader } from '../utils/date-utils.js';
 
-/**
- * Crée un slot de repas vide
- * @param {number} dayIndex - Index du jour (0-6)
- * @param {string} mealType - Type de repas ('lunch' ou 'dinner')
- * @param {Date} date - Date du repas
- * @param {Function} onSlotClick - Callback appelé lors du clic
- * @returns {HTMLElement} Élément slot vide
- */
+function createAddIcon() {
+  const addIcon = document.createElement('div');
+  addIcon.className = 'planning-meal-slot__add';
+  
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'w-8 h-8');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('stroke-linecap', 'round');
+  path.setAttribute('stroke-linejoin', 'round');
+  path.setAttribute('stroke-width', '2');
+  path.setAttribute('d', 'M12 4v16m8-8H4');
+  
+  svg.appendChild(path);
+  addIcon.appendChild(svg);
+  return addIcon;
+}
+
+function createPlaceholderImage() {
+  const image = document.createElement('div');
+  image.className = 'planning-meal-card__image planning-meal-card__image--placeholder';
+  
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'w-8 h-8 text-gray-400');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('stroke-linecap', 'round');
+  path.setAttribute('stroke-linejoin', 'round');
+  path.setAttribute('stroke-width', '2');
+  path.setAttribute('d', 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z');
+  
+  svg.appendChild(path);
+  image.appendChild(svg);
+  return image;
+}
+
+function createTimeElement(prepTime) {
+  const time = document.createElement('div');
+  time.className = 'planning-meal-card__time';
+  
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'w-4 h-4');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('stroke-linecap', 'round');
+  path.setAttribute('stroke-linejoin', 'round');
+  path.setAttribute('stroke-width', '2');
+  path.setAttribute('d', 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z');
+  
+  svg.appendChild(path);
+  time.appendChild(svg);
+  
+  const span = document.createElement('span');
+  span.textContent = `${prepTime}min`;
+  time.appendChild(span);
+  
+  return time;
+}
+
 export function createEmptyMealSlot(dayIndex, mealType, date, onSlotClick) {
   const slot = document.createElement('div');
   slot.className = 'planning-meal-slot planning-meal-slot--empty';
@@ -20,17 +76,9 @@ export function createEmptyMealSlot(dayIndex, mealType, date, onSlotClick) {
   slot.dataset.mealType = mealType;
   slot.dataset.date = formatDateString(date);
   
-  const addIcon = document.createElement('div');
-  addIcon.className = 'planning-meal-slot__add';
-  addIcon.innerHTML = `
-    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-    </svg>
-  `;
-  
+  const addIcon = createAddIcon();
   slot.appendChild(addIcon);
   
-  // Gestion du clic pour ajouter un repas (uniquement en mode édition)
   if (onSlotClick) {
     slot.addEventListener('click', () => {
       if (slot.closest('.planning-edit-mode')) {
@@ -42,15 +90,6 @@ export function createEmptyMealSlot(dayIndex, mealType, date, onSlotClick) {
   return slot;
 }
 
-/**
- * Crée un slot de repas rempli avec une recette
- * @param {number} dayIndex - Index du jour (0-6)
- * @param {string} mealType - Type de repas ('lunch' ou 'dinner')
- * @param {Date} date - Date du repas
- * @param {Object} meal - Données du repas
- * @param {Function} onSlotClick - Callback appelé lors du clic
- * @returns {HTMLElement} Élément slot rempli
- */
 export function createFilledMealSlot(dayIndex, mealType, date, meal, onSlotClick) {
   const slot = document.createElement('div');
   slot.className = 'planning-meal-slot planning-meal-slot--filled';
@@ -62,27 +101,19 @@ export function createFilledMealSlot(dayIndex, mealType, date, meal, onSlotClick
   const card = document.createElement('div');
   card.className = 'planning-meal-card';
   
-  // Image de la recette
   const image = document.createElement('div');
-  image.className = meal.recipe_image || meal.image
-    ? 'planning-meal-card__image' 
-    : 'planning-meal-card__image planning-meal-card__image--placeholder';
-  
-  if (meal.recipe_image || meal.image) {
+  const imageUrl = meal.recipe_image || meal.image;
+  if (imageUrl) {
+    image.className = 'planning-meal-card__image';
     const img = document.createElement('img');
-    img.src = meal.recipe_image || meal.image;
+    img.src = imageUrl;
     img.alt = meal.recipe_title || meal.title || 'Recette';
     image.appendChild(img);
   } else {
-    image.innerHTML = `
-      <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-    `;
+    image.appendChild(createPlaceholderImage());
   }
   card.appendChild(image);
   
-  // Contenu de la carte
   const content = document.createElement('div');
   content.className = 'planning-meal-card__content';
   
@@ -96,22 +127,13 @@ export function createFilledMealSlot(dayIndex, mealType, date, meal, onSlotClick
   
   const prepTime = meal.prep_time || meal.prepTime || 0;
   if (prepTime > 0) {
-    const time = document.createElement('div');
-    time.className = 'planning-meal-card__time';
-    time.innerHTML = `
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <span>${prepTime}min</span>
-    `;
-    meta.appendChild(time);
+    meta.appendChild(createTimeElement(prepTime));
   }
   
   content.appendChild(meta);
   card.appendChild(content);
   slot.appendChild(card);
   
-  // Gestion du clic pour modifier/supprimer (uniquement en mode édition)
   if (onSlotClick) {
     slot.addEventListener('click', () => {
       if (slot.closest('.planning-edit-mode')) {
@@ -123,23 +145,15 @@ export function createFilledMealSlot(dayIndex, mealType, date, meal, onSlotClick
   return slot;
 }
 
-/**
- * Crée une colonne de jour pour la grille hebdomadaire
- * @param {number} dayIndex - Index du jour (0-6)
- * @param {Date} date - Date du jour
- * @returns {HTMLElement} Élément colonne
- */
 export function createDayColumn(dayIndex, date) {
   const column = document.createElement('div');
   column.className = 'planning-day-column';
   
-  // En-tête du jour
   const header = document.createElement('div');
   header.className = 'planning-day-header';
   header.textContent = formatDayHeader(date);
   column.appendChild(header);
   
-  // Slot Déjeuner
   const lunchSlot = document.createElement('div');
   lunchSlot.className = 'planning-meal-type';
   
@@ -153,7 +167,6 @@ export function createDayColumn(dayIndex, date) {
   lunchSlot.appendChild(lunchContainer);
   column.appendChild(lunchSlot);
   
-  // Slot Dîner
   const dinnerSlot = document.createElement('div');
   dinnerSlot.className = 'planning-meal-type';
   

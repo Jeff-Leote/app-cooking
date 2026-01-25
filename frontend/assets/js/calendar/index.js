@@ -29,11 +29,9 @@ export function initCalendarPage() {
     // window.location.href = `/planning/new?date=${dateStr}`;
   }
 
-  // Fonction pour mettre à jour le calendrier
   async function updateCalendar() {
     renderCalendarGrid(grid, currentYear, currentMonth, handleDayClick);
     updateMonthYearTitle(monthYearEl, currentYear, currentMonth);
-
     const meals = await loadMealsForMonth(currentYear, currentMonth);
     renderMeals(meals);
   }
@@ -46,7 +44,7 @@ export function initCalendarPage() {
         currentMonth = MONTHS_PER_YEAR - 1;
         currentYear--;
       }
-      updateCalendar();
+      void updateCalendar();
     });
   }
 
@@ -57,7 +55,7 @@ export function initCalendarPage() {
         currentMonth = 0;
         currentYear++;
       }
-      updateCalendar();
+      void updateCalendar();
     });
   }
 
@@ -66,10 +64,9 @@ export function initCalendarPage() {
       const today = new Date();
       currentMonth = today.getMonth();
       currentYear = today.getFullYear();
-      updateCalendar();
+      void updateCalendar();
     });
   }
 
-  // Initialisation
-  updateCalendar();
+  void updateCalendar();
 }

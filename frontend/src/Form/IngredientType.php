@@ -31,21 +31,6 @@ class IngredientType extends AbstractType
                     ]),
                 ],
             ])
-            ->add('unite', TextType::class, [
-                'label' => 'Unité de mesure',
-                'required' => false,
-                'attr' => [
-                    'class' => 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent',
-                    'placeholder' => 'Ex: g, kg, L, mL, pièce, etc.',
-                    'maxlength' => 50,
-                ],
-                'constraints' => [
-                    new Assert\Length([
-                        'max' => 50,
-                        'maxMessage' => 'L\'unité ne peut pas dépasser {{ limit }} caractères',
-                    ]),
-                ],
-            ])
             ->add('sans_lactose', CheckboxType::class, [
                 'label' => 'Sans lactose',
                 'required' => false,

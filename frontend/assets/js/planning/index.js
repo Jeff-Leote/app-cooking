@@ -55,8 +55,7 @@ export function initPlanningPage() {
       parent.replaceChild(newSlot, slotElement);
     }
     
-    // Mettre à jour les statistiques
-    updateWeek();
+    void updateWeek();
   }
   
   // Gestionnaire de clic sur un slot
@@ -66,10 +65,9 @@ export function initPlanningPage() {
     }
   }
   
-  // Initialiser les modals AVANT updateWeek
-  const weekModal = initWeekModal((selectedDate) => {
+  const weekModal = initWeekModal(async (selectedDate) => {
     startDate = selectedDate;
-    updateWeek();
+    await updateWeek();
   });
   
   recipeModal = initRecipeModal(handleRecipeSelect);
@@ -79,7 +77,6 @@ export function initPlanningPage() {
     window.openRecipeModal = recipeModal.open;
   }
   
-  // Fonction pour mettre à jour la semaine
   async function updateWeek() {
     updateWeekSelector(weekText, startDate);
     const meals = await loadMealsForWeek(startDate);
@@ -87,21 +84,19 @@ export function initPlanningPage() {
     updateStatistics(meals);
   }
   
-  // Navigation semaine précédente
   if (prevWeekBtn) {
-    prevWeekBtn.addEventListener('click', () => {
+    prevWeekBtn.addEventListener('click', async () => {
       startDate = new Date(startDate);
       startDate.setDate(startDate.getDate() - 7);
-      updateWeek();
+      await updateWeek();
     });
   }
   
-  // Navigation semaine suivante
   if (nextWeekBtn) {
-    nextWeekBtn.addEventListener('click', () => {
+    nextWeekBtn.addEventListener('click', async () => {
       startDate = new Date(startDate);
       startDate.setDate(startDate.getDate() + 7);
-      updateWeek();
+      await updateWeek();
     });
   }
   
@@ -127,16 +122,13 @@ export function initPlanningPage() {
     });
   }
   
-  // Bouton Annuler
   if (cancelBtn) {
-    cancelBtn.addEventListener('click', () => {
+    cancelBtn.addEventListener('click', async () => {
       isEditMode = false;
       disableEditMode(grid, editBtn, editBtnText, cancelBtn);
-      // Recharger les données originales
-      updateWeek();
+      await updateWeek();
     });
   }
   
-  // Initialisation
-  updateWeek();
+  void updateWeek();
 }

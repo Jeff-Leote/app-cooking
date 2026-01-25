@@ -23,18 +23,21 @@
             {# Formulaire #}
             {{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
             
+                {# Titre #}
                 <div>
                     {{ form_label(form.titre, null, {'label_attr': {'class': 'block text-sm font-semibold text-dark-blue mb-2'}}) }}
                     {{ form_widget(form.titre) }}
                     {{ form_errors(form.titre) }}
                 </div>
                 
+                {# Description - Grande zone de texte #}
                 <div>
                     {{ form_label(form.description, null, {'label_attr': {'class': 'block text-sm font-semibold text-dark-blue mb-2'}}) }}
-                    {{ form_widget(form.description) }}
+                    {{ form_widget(form.description, {'attr': {'rows': 8, 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent resize-none'}}) }}
                     {{ form_errors(form.description) }}
                 </div>
                 
+                {# Temps de préparation, Image URL et Favorite #}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         {{ form_label(form.temps_preparation, null, {'label_attr': {'class': 'block text-sm font-semibold text-dark-blue mb-2'}}) }}
@@ -49,6 +52,7 @@
                     </div>
                 </div>
                 
+                {# Favorite #}
                 <div class="flex items-center">
                     {{ form_widget(form.is_favorite) }}
                     {{ form_label(form.is_favorite, null, {'label_attr': {'class': 'ml-2 text-sm font-semibold text-dark-blue'}}) }}
@@ -58,13 +62,16 @@
                 {# Section Ingrédients #}
                 <div class="pt-6 border-t border-gray-200">
                     <div class="flex items-center justify-between mb-4">
-                        <label class="block text-sm font-semibold text-dark-blue">Ingrédients</label>
-                        <button type="button" id="add-ingredient-btn" class="bg-primary-green text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary-green/90 transition-colors">
-                            + Ajouter un ingrédient
+                        <h3 class="text-lg font-semibold text-dark-blue">Ingrédients</h3>
+                        <button type="button" id="add-ingredient-btn" class="inline-flex items-center gap-2 bg-primary-green text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary-green/90 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Ajouter un ingrédient
                         </button>
                     </div>
                     
-                    <div id="ingredients-list" class="space-y-4">
+                    <div id="ingredients-list" class="space-y-3">
                         {% for ingredient in form.ingredients %}
                             <div class="ingredient-item bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -92,6 +99,7 @@
                     {{ form_errors(form.ingredients) }}
                 </div>
                 
+                {# Boutons #}
                 <div class="pt-4 flex gap-4">
                     {{ form_widget(form.submit) }}
                     <a href="{{ path('app_recipes') }}" class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors text-center">
@@ -111,7 +119,6 @@
             const prototype = document.getElementById('ingredient-prototype');
             let ingredientIndex = ingredientsList.children.length;
             
-            // Fonction pour ajouter un ingrédient
             function addIngredient() {
                 const prototypeHtml = prototype.dataset.prototype;
                 const newForm = prototypeHtml.replace(/__name__/g, ingredientIndex);
@@ -123,31 +130,27 @@
                 contentDiv.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
                 contentDiv.innerHTML = newForm;
                 
-                // Ajouter les labels et styles
-                const selects = contentDiv.querySelectorAll('select');
-                const inputs = contentDiv.querySelectorAll('input');
+                const select = contentDiv.querySelector('select');
+                const quantityInput = contentDiv.querySelector('input[type="text"]');
                 
-                selects.forEach((select, index) => {
+                if (select) {
                     select.className = 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent';
                     const label = document.createElement('label');
                     label.className = 'block text-sm font-semibold text-dark-blue mb-2';
-                    label.textContent = index === 0 ? 'Ingrédient' : 'Quantité';
+                    label.textContent = 'Ingrédient';
                     select.parentNode.insertBefore(label, select);
-                });
+                }
                 
-                inputs.forEach(input => {
-                    input.className = 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent';
-                    if (input.type === 'text' && !input.previousElementSibling || (input.previousElementSibling && input.previousElementSibling.tagName !== 'LABEL')) {
-                        const label = document.createElement('label');
-                        label.className = 'block text-sm font-semibold text-dark-blue mb-2';
-                        label.textContent = 'Quantité';
-                        input.parentNode.insertBefore(label, input);
-                    }
-                });
+                if (quantityInput) {
+                    quantityInput.className = 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent';
+                    const label = document.createElement('label');
+                    label.className = 'block text-sm font-semibold text-dark-blue mb-2';
+                    label.textContent = 'Quantité';
+                    quantityInput.parentNode.insertBefore(label, quantityInput);
+                }
                 
                 ingredientDiv.appendChild(contentDiv);
                 
-                // Ajouter le bouton de suppression
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
                 removeBtn.className = 'mt-2 text-red-600 hover:text-red-800 text-sm font-semibold remove-ingredient-btn';
@@ -161,12 +164,10 @@
                 ingredientIndex++;
             }
             
-            // Événement pour ajouter un ingrédient
             if (addBtn) {
                 addBtn.addEventListener('click', addIngredient);
             }
             
-            // Gestion des boutons de suppression existants
             document.querySelectorAll('.remove-ingredient-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     this.closest('.ingredient-item').remove();

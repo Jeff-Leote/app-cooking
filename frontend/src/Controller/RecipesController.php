@@ -50,19 +50,19 @@ class RecipesController extends AbstractController
             unset($data['ingredients']);
             
             try {
-                // Créer la recette
-                $response = $this->httpClient->request('POST', "{$this->getBackendUrl()}/api/recipes", [
+                $backendUrl = $this->getBackendUrl();
+                $response = $this->httpClient->request('POST', "{$backendUrl}/api/recipes", [
                     'json' => $data,
                     'headers' => [
                         'Content-Type' => 'application/json',
                     ],
+                    'timeout' => 30,
                 ]);
 
                 if ($response->getStatusCode() === 201) {
                     $recipe = $response->toArray();
                     $recipeId = $recipe['id'] ?? null;
                     
-                    // Ajouter les ingrédients si la recette a été créée
                     if ($recipeId && !empty($ingredients)) {
                         $this->addRecipeIngredients($recipeId, $ingredients);
                     }
@@ -70,6 +70,8 @@ class RecipesController extends AbstractController
                     $this->addFlash('success', 'Recette créée avec succès !');
                     return $this->redirectToRoute('app_recipes');
                 }
+            } catch (\Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface $e) {
+                $this->addFlash('error', 'Impossible de se connecter au backend. Vérifiez que le service backend est démarré.');
             } catch (\Exception $e) {
                 $this->addFlash('error', 'Erreur lors de la création de la recette : ' . $e->getMessage());
             }
@@ -85,9 +87,14 @@ class RecipesController extends AbstractController
     public function edit(int $id, Request $request): Response
     {
         try {
-            // Récupérer la recette depuis l'API
-            $response = $this->httpClient->request('GET', "{$this->getBackendUrl()}/api/recipes/{$id}");
+            $backendUrl = $this->getBackendUrl();
+            $response = $this->httpClient->request('GET', "{$backendUrl}/api/recipes/{$id}", [
+                'timeout' => 30,
+            ]);
             $recipe = $response->toArray();
+        } catch (\Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface $e) {
+            $this->addFlash('error', 'Impossible de se connecter au backend. Vérifiez que le service backend est démarré.');
+            return $this->redirectToRoute('app_recipes');
         } catch (\Exception $e) {
             $this->addFlash('error', 'Recette introuvable');
             return $this->redirectToRoute('app_recipes');
@@ -123,21 +130,23 @@ class RecipesController extends AbstractController
             unset($data['ingredients']);
             
             try {
-                // Mettre à jour la recette via l'API
-                $response = $this->httpClient->request('PATCH', "{$this->getBackendUrl()}/api/recipes/{$id}", [
+                $backendUrl = $this->getBackendUrl();
+                $response = $this->httpClient->request('PATCH', "{$backendUrl}/api/recipes/{$id}", [
                     'json' => $data,
                     'headers' => [
                         'Content-Type' => 'application/json',
                     ],
+                    'timeout' => 30,
                 ]);
 
                 if ($response->getStatusCode() === 200) {
-                    // Mettre à jour les ingrédients
                     $this->updateRecipeIngredients($id, $ingredients);
                     
                     $this->addFlash('success', 'Recette modifiée avec succès !');
                     return $this->redirectToRoute('app_recipes');
                 }
+            } catch (\Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface $e) {
+                $this->addFlash('error', 'Impossible de se connecter au backend. Vérifiez que le service backend est démarré.');
             } catch (\Exception $e) {
                 $this->addFlash('error', 'Erreur lors de la modification de la recette : ' . $e->getMessage());
             }
@@ -156,7 +165,10 @@ class RecipesController extends AbstractController
     private function loadIngredients(): array
     {
         try {
-            $response = $this->httpClient->request('GET', "{$this->getBackendUrl()}/api/ingredients");
+            $backendUrl = $this->getBackendUrl();
+            $response = $this->httpClient->request('GET', "{$backendUrl}/api/ingredients", [
+                'timeout' => 30,
+            ]);
             return $response->toArray();
         } catch (\Exception $e) {
             return [];

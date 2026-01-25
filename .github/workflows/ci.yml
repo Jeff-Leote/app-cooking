@@ -38,8 +38,9 @@ jobs:
       - name: Générer Prisma Client
         run: npx prisma generate
         env:
-          # URL de test pour Prisma CI/CD uniquement (pas de vraies credentials en production)
-          DATABASE_URL: ${{ secrets.DATABASE_URL || 'mysql://test:test@localhost:3306/test_db' }}
+          # URL factice pour Prisma (generate n'a pas besoin de se connecter à la DB),
+          # et sans mot de passe en clair dans le dépôt.
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://postgres@localhost:5432/test_db?schema=public' }}
 
       # Étape 5 : Compiler le code TypeScript
       - run: npm run build
@@ -80,8 +81,6 @@ jobs:
           APP_ENV=test
           APP_DEBUG=false
           APP_SECRET=test-secret-key-for-ci-cd-only-not-for-production-use-32-chars
-          # URL de test pour CI/CD uniquement (pas de vraies credentials)
-          DATABASE_URL=mysql://test:test@localhost:3306/test_db
           DEFAULT_URI=http://localhost
           EOF
 
