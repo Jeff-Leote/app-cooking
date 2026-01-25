@@ -28,7 +28,7 @@ export class RecipesService {
     }
 
     return this.prisma.recipe.findMany({
-      where,
+      where: where,
       orderBy: {
         created_at: 'desc',
       },

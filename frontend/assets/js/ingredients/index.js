@@ -29,7 +29,7 @@ function setupFilters(container, state, loadIngredients) {
       filterButtons.forEach((b) => b.classList.remove('active-filter'));
       btn.classList.add('active-filter');
       state.currentFilter = btn.dataset.filter || 'all';
-      loadIngredients();
+      void loadIngredients().catch((err) => console.error('Erreur loadIngredients:', err));
     });
   });
 }
@@ -63,7 +63,7 @@ function setupSearch(searchInput, state, loadIngredients) {
     clearTimeout(searchTimeout);
     state.searchQuery = e.target.value.trim();
     searchTimeout = setTimeout(() => {
-      loadIngredients();
+      void loadIngredients().catch((err) => console.error('Erreur loadIngredients:', err));
     }, SEARCH_DEBOUNCE_MS);
   });
 }
@@ -395,5 +395,5 @@ export function initIngredientsPage() {
     state.currentFilter = activeFilterBtn.dataset.filter || 'all';
   }
 
-  loadIngredients();
+  void loadIngredients().catch((err) => console.error('Erreur loadIngredients:', err));
 }

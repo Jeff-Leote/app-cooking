@@ -10,7 +10,7 @@ export class IngredientsService {
 
   async create(createIngredientDto: CreateIngredientDto) {
     return this.prisma.ingredient.create({
-      data: createIngredientDto,
+      data: { ...createIngredientDto },
     });
   }
 
@@ -43,7 +43,7 @@ export class IngredientsService {
     });
 
     return this.prisma.ingredient.findMany({
-      where,
+      where: where,
       orderBy: {
         nom: 'asc',
       },
@@ -88,7 +88,7 @@ export class IngredientsService {
     await this.findOne(id);
 
     return this.prisma.ingredient.update({
-      where: { id },
+      where: { id: id },
       data: updateIngredientDto,
     });
   }
@@ -97,7 +97,7 @@ export class IngredientsService {
     await this.findOne(id);
 
     return this.prisma.ingredient.delete({
-      where: { id },
+      where: { id: id },
     });
   }
 }

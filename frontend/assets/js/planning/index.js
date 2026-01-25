@@ -11,6 +11,9 @@ import { initRecipeModal } from './recipe-modal.js';
 import { createFilledMealSlot } from './dom.js';
 
 function createMealFromRecipe(recipe) {
+  if (!recipe || recipe.id == null) {
+    return null;
+  }
   return {
     recipe_id: recipe.id,
     recipe_title: recipe.titre,
@@ -43,15 +46,15 @@ export function initPlanningPage() {
   let isEditMode = false;
   let recipeModal = null;
   
-  async function updateWeek() {
+  function updateWeek() {
     updateWeekSelector(weekText, startDate);
-    const meals = await loadMealsForWeek(startDate);
-    renderWeekGrid(grid, startDate, meals, handleSlotClick);
-    updateStatistics(meals);
-  }
 
-  function safeUpdateWeek() {
-    void updateWeek().catch((err) => console.error('Erreur updateWeek:', err));
+    void loadMealsForWeek(startDate)
+      .then((meals) => {
+        renderWeekGrid(grid, startDate, meals, handleSlotClick);
+        updateStatistics(meals);
+      })
+      .catch((err) => console.error('Erreur updateWeek:', err));
   }
 
   // Gestionnaire de clic sur un slot
@@ -64,6 +67,8 @@ export function initPlanningPage() {
   // Gestionnaire de sélection de recette
   function handleRecipeSelect(recipe, slotId, mealType, date) {
     if (!slotId || !mealType || !date) return;
+    const meal = createMealFromRecipe(recipe);
+    if (!meal) return;
     
     // Trouver le slot dans le DOM
     const slotElement = document.getElementById(slotId);
@@ -71,7 +76,6 @@ export function initPlanningPage() {
     
     // Créer un nouveau slot rempli avec la recette
     const dayIndex = getDayIndexFromSlotId(slotId);
-    const meal = createMealFromRecipe(recipe);
     
     const newSlot = createFilledMealSlot(dayIndex, mealType, date, meal, handleSlotClick);
     
@@ -81,12 +85,12 @@ export function initPlanningPage() {
       parent.replaceChild(newSlot, slotElement);
     }
     
-    safeUpdateWeek();
+    updateWeek();
   }
   
   const weekModal = initWeekModal(async (selectedDate) => {
     startDate = selectedDate;
-    await updateWeek();
+    updateWeek();
   });
   
   recipeModal = initRecipeModal(handleRecipeSelect);
@@ -97,18 +101,18 @@ export function initPlanningPage() {
   }
   
   if (prevWeekBtn) {
-    prevWeekBtn.addEventListener('click', async () => {
+    prevWeekBtn.addEventListener('click', () => {
       startDate = new Date(startDate);
       startDate.setDate(startDate.getDate() - 7);
-      await updateWeek();
+      updateWeek();
     });
   }
   
   if (nextWeekBtn) {
-    nextWeekBtn.addEventListener('click', async () => {
+    nextWeekBtn.addEventListener('click', () => {
       startDate = new Date(startDate);
       startDate.setDate(startDate.getDate() + 7);
-      await updateWeek();
+      updateWeek();
     });
   }
   
@@ -135,12 +139,12 @@ export function initPlanningPage() {
   }
   
   if (cancelBtn) {
-    cancelBtn.addEventListener('click', async () => {
+    cancelBtn.addEventListener('click', () => {
       isEditMode = false;
       disableEditMode(grid, editBtn, editBtnText, cancelBtn);
-      await updateWeek();
+      updateWeek();
     });
   }
   
-  safeUpdateWeek();
+  updateWeek();
 }

@@ -29,11 +29,13 @@ export function initCalendarPage() {
     // window.location.href = `/planning/new?date=${dateStr}`;
   }
 
-  async function updateCalendar() {
+  function updateCalendar() {
     renderCalendarGrid(grid, currentYear, currentMonth, handleDayClick);
     updateMonthYearTitle(monthYearEl, currentYear, currentMonth);
-    const meals = await loadMealsForMonth(currentYear, currentMonth);
-    renderMeals(meals);
+
+    void loadMealsForMonth(currentYear, currentMonth)
+      .then((meals) => renderMeals(meals))
+      .catch((err) => console.error('Erreur updateCalendar:', err));
   }
 
   // Navigation
@@ -44,7 +46,7 @@ export function initCalendarPage() {
         currentMonth = MONTHS_PER_YEAR - 1;
         currentYear--;
       }
-      void updateCalendar().catch((err) => console.error('Erreur updateCalendar:', err));
+      updateCalendar();
     });
   }
 
@@ -55,7 +57,7 @@ export function initCalendarPage() {
         currentMonth = 0;
         currentYear++;
       }
-      void updateCalendar().catch((err) => console.error('Erreur updateCalendar:', err));
+      updateCalendar();
     });
   }
 
@@ -64,9 +66,9 @@ export function initCalendarPage() {
       const today = new Date();
       currentMonth = today.getMonth();
       currentYear = today.getFullYear();
-      void updateCalendar().catch((err) => console.error('Erreur updateCalendar:', err));
+      updateCalendar();
     });
   }
 
-  void updateCalendar().catch((err) => console.error('Erreur updateCalendar:', err));
+  updateCalendar();
 }
