@@ -6,20 +6,6 @@
     <div class="space-y-6">
         <div class="bg-white rounded-xl shadow-sm p-8">
             <h2 class="text-2xl font-bold text-dark-blue mb-6">Modifier l'ingrédient</h2>
-            
-            {# Messages flash #}
-            {% for message in app.flashes('success') %}
-                <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-                    {{ message }}
-                </div>
-            {% endfor %}
-            
-            {% for message in app.flashes('error') %}
-                <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                    {{ message }}
-                </div>
-            {% endfor %}
-            
             {# Formulaire #}
             {{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
             
@@ -29,35 +15,13 @@
                     {{ form_errors(form.nom) }}
                 </div>
                 
-                {# Caractéristiques nutritionnelles #}
+                {# Catégorie alimentaire #}
                 <div class="pt-4 border-t border-gray-200">
-                    <h3 class="text-lg font-semibold text-dark-blue mb-4">Caractéristiques nutritionnelles</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="flex items-center">
-                            {{ form_widget(form.sans_lactose) }}
-                            {{ form_label(form.sans_lactose, null, {'label_attr': {'class': 'ml-2 text-sm font-semibold text-dark-blue'}}) }}
-                            {{ form_errors(form.sans_lactose) }}
-                        </div>
-                        <div class="flex items-center">
-                            {{ form_widget(form.sans_gluten) }}
-                            {{ form_label(form.sans_gluten, null, {'label_attr': {'class': 'ml-2 text-sm font-semibold text-dark-blue'}}) }}
-                            {{ form_errors(form.sans_gluten) }}
-                        </div>
-                        <div class="flex items-center">
-                            {{ form_widget(form.riche_proteines) }}
-                            {{ form_label(form.riche_proteines, null, {'label_attr': {'class': 'ml-2 text-sm font-semibold text-dark-blue'}}) }}
-                            {{ form_errors(form.riche_proteines) }}
-                        </div>
-                        <div class="flex items-center">
-                            {{ form_widget(form.riche_fibres) }}
-                            {{ form_label(form.riche_fibres, null, {'label_attr': {'class': 'ml-2 text-sm font-semibold text-dark-blue'}}) }}
-                            {{ form_errors(form.riche_fibres) }}
-                        </div>
-                        <div class="flex items-center">
-                            {{ form_widget(form.riche_vitamines) }}
-                            {{ form_label(form.riche_vitamines, null, {'label_attr': {'class': 'ml-2 text-sm font-semibold text-dark-blue'}}) }}
-                            {{ form_errors(form.riche_vitamines) }}
-                        </div>
+                    <h3 class="text-lg font-semibold text-dark-blue mb-4">Catégorie alimentaire</h3>
+                    <div>
+                        {{ form_label(form.categorie, null, {'label_attr': {'class': 'block text-sm font-semibold text-dark-blue mb-2'}}) }}
+                        {{ form_widget(form.categorie) }}
+                        {{ form_errors(form.categorie) }}
                     </div>
                 </div>
                 

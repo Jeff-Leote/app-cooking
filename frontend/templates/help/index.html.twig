@@ -1,0 +1,16 @@
+{% extends 'layouts/app.html.twig' %}
+
+{% block header %}
+    {% embed 'components/header.html.twig' %}
+        {% block page_title %}Aide{% endblock %}
+    {% endembed %}
+{% endblock %}
+
+{% block content %}
+    <div class="space-y-6">
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-xl font-bold text-dark-blue mb-4">Centre d'aide</h2>
+            <p class="text-gray-600">Cette page sera disponible prochainement.</p>
+        </div>
+    </div>
+{% endblock %}

@@ -14,6 +14,7 @@ import {
 import { IngredientsService } from './ingredients.service';
 import { CreateIngredientDto } from './dto/create-ingredient.dto';
 import { UpdateIngredientDto } from './dto/update-ingredient.dto';
+import { IngredientCategory } from '@prisma/client';
 
 @Controller('ingredients')
 export class IngredientsController {
@@ -28,19 +29,16 @@ export class IngredientsController {
   @Get()
   findAll(
     @Query('search') search?: string,
-    @Query('sans_lactose') sansLactose?: string,
-    @Query('sans_gluten') sansGluten?: string,
-    @Query('riche_proteines') richeProteines?: string,
-    @Query('riche_fibres') richeFibres?: string,
-    @Query('riche_vitamines') richeVitamines?: string,
+    @Query('categorie') categorie?: string,
   ) {
+    let categorieEnum: IngredientCategory | undefined = undefined;
+    if (categorie && (Object.values(IngredientCategory) as string[]).includes(categorie)) {
+      categorieEnum = categorie as IngredientCategory;
+    }
+
     const filters = {
       search,
-      sans_lactose: sansLactose === 'true',
-      sans_gluten: sansGluten === 'true',
-      riche_proteines: richeProteines === 'true',
-      riche_fibres: richeFibres === 'true',
-      riche_vitamines: richeVitamines === 'true',
+      categorie: categorieEnum,
     };
     return this.ingredientsService.findAll(filters);
   }

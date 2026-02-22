@@ -1,4 +1,5 @@
-import { IsString, IsOptional, IsNotEmpty, MaxLength, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsNotEmpty, MaxLength, IsEnum } from 'class-validator';
+import { IngredientCategory } from '@prisma/client';
 
 const MAX_NAME_LENGTH = 255;
 
@@ -9,22 +10,6 @@ export class CreateIngredientDto {
   nom: string;
 
   @IsOptional()
-  @IsBoolean()
-  sans_lactose?: boolean;
-
-  @IsOptional()
-  @IsBoolean()
-  sans_gluten?: boolean;
-
-  @IsOptional()
-  @IsBoolean()
-  riche_proteines?: boolean;
-
-  @IsOptional()
-  @IsBoolean()
-  riche_fibres?: boolean;
-
-  @IsOptional()
-  @IsBoolean()
-  riche_vitamines?: boolean;
+  @IsEnum(IngredientCategory)
+  categorie?: IngredientCategory;
 }

@@ -1,0 +1,86 @@
+{# Toasts globaux (flash Symfony) - affichés en bas à droite #}
+{# IMPORTANT: app.flashes() consomme les messages -> on les lit UNE fois. #}
+{% set successFlashes = app.flashes('success') %}
+{% set errorFlashes = app.flashes('error') %}
+
+{% if successFlashes|length > 0 or errorFlashes|length > 0 %}
+  <div
+    id="toast-container"
+    class="fixed bottom-4 right-4 z-50 flex flex-col gap-3 w-[min(420px,calc(100vw-2rem))] pointer-events-none"
+    aria-live="polite"
+    aria-relevant="additions removals"
+  >
+    {% for message in successFlashes %}
+      {% set borderClass = 'border-l-green-500' %}
+      {% set iconBgClass = 'bg-green-100 text-green-700' %}
+      {% set title = 'Succès' %}
+      {% set role = 'status' %}
+
+      <div
+        data-toast
+        data-toast-type="success"
+        role="{{ role }}"
+        class="pointer-events-auto flex gap-3 items-start bg-white border border-gray-200 {{ borderClass }} border-l-4 shadow-lg rounded-xl p-4 transition-all duration-200"
+      >
+        <div class="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center {{ iconBgClass }}">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-semibold text-dark-blue">{{ title }}</p>
+          <p class="text-sm text-gray-700 mt-1 break-words">{{ message }}</p>
+        </div>
+
+        <button
+          type="button"
+          data-toast-close
+          class="shrink-0 text-gray-400 hover:text-gray-700 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+          aria-label="Fermer"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    {% endfor %}
+
+    {% for message in errorFlashes %}
+      {% set borderClass = 'border-l-red-500' %}
+      {% set iconBgClass = 'bg-red-100 text-red-700' %}
+      {% set title = 'Erreur' %}
+      {% set role = 'alert' %}
+
+      <div
+        data-toast
+        data-toast-type="error"
+        role="{{ role }}"
+        class="pointer-events-auto flex gap-3 items-start bg-white border border-gray-200 {{ borderClass }} border-l-4 shadow-lg rounded-xl p-4 transition-all duration-200"
+      >
+        <div class="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center {{ iconBgClass }}">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-semibold text-dark-blue">{{ title }}</p>
+          <p class="text-sm text-gray-700 mt-1 break-words">{{ message }}</p>
+        </div>
+
+        <button
+          type="button"
+          data-toast-close
+          class="shrink-0 text-gray-400 hover:text-gray-700 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+          aria-label="Fermer"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+

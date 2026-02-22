@@ -90,7 +90,38 @@ export function createEmptyMealSlot(dayIndex, mealType, date, onSlotClick) {
   return slot;
 }
 
-export function createFilledMealSlot(dayIndex, mealType, date, meal, onSlotClick) {
+function createDeleteButton(mealId, onDelete) {
+  const deleteBtn = document.createElement('button');
+  deleteBtn.type = 'button';
+  deleteBtn.className = 'planning-meal-card__delete';
+  deleteBtn.setAttribute('aria-label', 'Supprimer ce repas');
+  
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'w-4 h-4');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('stroke-linecap', 'round');
+  path.setAttribute('stroke-linejoin', 'round');
+  path.setAttribute('stroke-width', '2');
+  path.setAttribute('d', 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16');
+  
+  svg.appendChild(path);
+  deleteBtn.appendChild(svg);
+  
+  deleteBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (onDelete && mealId) {
+      onDelete(mealId);
+    }
+  });
+  
+  return deleteBtn;
+}
+
+export function createFilledMealSlot(dayIndex, mealType, date, meal, onSlotClick, onDelete) {
   const slot = document.createElement('div');
   slot.className = 'planning-meal-slot planning-meal-slot--filled';
   slot.id = `planning-slot-${dayIndex}-${mealType}`;
@@ -132,6 +163,14 @@ export function createFilledMealSlot(dayIndex, mealType, date, meal, onSlotClick
   
   content.appendChild(meta);
   card.appendChild(content);
+  
+  // Ajouter le bouton de suppression si on est en mode édition et qu'on a un mealId
+  const mealId = meal.id || meal.meal_id;
+  if (mealId && onDelete) {
+    const deleteBtn = createDeleteButton(mealId, onDelete);
+    card.appendChild(deleteBtn);
+  }
+  
   slot.appendChild(card);
   
   if (onSlotClick) {

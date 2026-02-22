@@ -1,0 +1,184 @@
+{% extends 'layouts/app.html.twig' %}
+
+{% block header %}
+    {% embed 'components/header.html.twig' %}
+        {% block page_title %}{{ recipe.titre ?? 'Recette' }}{% endblock %}
+        
+        {% block header_actions %}
+            <button 
+                type="button"
+                onclick="window.location.href='/recipes/{{ recipe.id }}/edit';"
+                class="inline-flex items-center justify-center gap-2 bg-primary-green text-white font-semibold px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
+            >
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+                <span class="hidden sm:inline">Modifier</span>
+            </button>
+            <a 
+                href="{{ path('app_recipes') }}" 
+                class="inline-flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 font-semibold px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg hover:bg-gray-50 transition-all duration-200 shadow-sm"
+            >
+                <span>Retour</span>
+            </a>
+        {% endblock %}
+    {% endembed %}
+{% endblock %}
+
+{% block content %}
+    {% set categoryLabels = {
+        'FECULENTS': 'Féculents',
+        'PROTEINES': 'Protéines',
+        'LEGUMES': 'Légumes',
+        'FRUITS': 'Fruits',
+        'PRODUITS_LAITIERS': 'Produits laitiers',
+        'MATIERES_GRASSES': 'Matières grasses',
+        'CEREALES': 'Céréales',
+        'OLEAGINEUX': 'Oléagineux',
+        'PRODUITS_SUCRES': 'Produits sucrés',
+        'PRODUITS_SALES': 'Produits salés',
+        'BOISSONS': 'Boissons',
+        'EPICES_CONDIMENTS': 'Épices et condiments'
+    } %}
+    
+    {% set categoryColors = {
+        'FECULENTS': 'bg-amber-100 text-amber-800',
+        'PROTEINES': 'bg-red-100 text-red-800',
+        'LEGUMES': 'bg-green-100 text-green-800',
+        'FRUITS': 'bg-orange-100 text-orange-800',
+        'PRODUITS_LAITIERS': 'bg-blue-100 text-blue-800',
+        'MATIERES_GRASSES': 'bg-yellow-100 text-yellow-800',
+        'CEREALES': 'bg-amber-200 text-amber-900',
+        'OLEAGINEUX': 'bg-yellow-200 text-yellow-900',
+        'PRODUITS_SUCRES': 'bg-pink-100 text-pink-800',
+        'PRODUITS_SALES': 'bg-gray-100 text-gray-800',
+        'BOISSONS': 'bg-cyan-100 text-cyan-800',
+        'EPICES_CONDIMENTS': 'bg-purple-100 text-purple-800'
+    } %}
+    
+    {# Préparer les ingrédients groupés par catégorie #}
+    {% set currentCategory = null %}
+    
+    <div class="w-full max-w-full space-y-4 sm:space-y-6">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden w-full">
+            {% if recipe.image_url %}
+                <div class="relative w-full h-48 sm:h-64 md:h-80 lg:h-96 overflow-hidden">
+                    <img src="{{ recipe.image_url }}" alt="{{ recipe.titre }}" class="w-full h-full object-cover">
+                </div>
+            {% endif %}
+            
+            <div class="p-4 sm:p-6 md:p-8 lg:p-10">
+                {# Titre et métadonnées #}
+                <div class="mb-6 sm:mb-8">
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-4">
+                        <div class="flex-1">
+                            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-dark-blue mb-3 sm:mb-4 leading-tight">
+                                {{ recipe.titre ?? 'Sans titre' }}
+                            </h1>
+                        </div>
+                        {% if recipe.is_favorite %}
+                            <div class="flex items-center justify-center sm:justify-start">
+                                <svg class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-primary-green flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if recipe.temps_preparation %}
+                        <div class="flex items-center gap-2 text-gray-600 mb-4">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="text-sm sm:text-base font-medium">{{ recipe.temps_preparation }} min</span>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                {# Ingrédients en cubes individuels - Entre titre et description #}
+                {% if recipe.recipeIngredients is defined and recipe.recipeIngredients|length > 0 %}
+                    <div class="mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-gray-200">
+                        <div class="flex items-center justify-between mb-4 sm:mb-6">
+                            <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-dark-blue">Ingrédients</h2>
+                            <button
+                                id="add-missing-to-shopping-list-btn"
+                                class="inline-flex items-center gap-2 bg-primary-green text-white font-semibold px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md"
+                                data-recipe-id="{{ recipe.id }}"
+                            >
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                <span class="hidden sm:inline">Ajouter manquants à la liste</span>
+                                <span class="sm:hidden">Manquants</span>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                            {% for recipeIngredient in recipe.recipeIngredients %}
+                                {% set ingredient = recipeIngredient.ingredient ?? null %}
+                                {% if ingredient %}
+                                    {% set category = ingredient.categorie ?? null %}
+                                    <div class="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                                        {# Badge de catégorie #}
+                                        {% if category and categoryLabels[category] is defined %}
+                                            <div class="mb-2 sm:mb-3">
+                                                <span class="inline-block px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold {{ categoryColors[category] ?? 'bg-gray-100 text-gray-800' }}">
+                                                    {{ categoryLabels[category] }}
+                                                </span>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {# Nom et quantité de l'ingrédient #}
+                                        <div class="flex items-start gap-2">
+                                            <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary-green rounded-full mt-1.5 sm:mt-2 flex-shrink-0"></span>
+                                            <div class="flex-1 min-w-0">
+                                                {% if recipeIngredient.quantite %}
+                                                    <div class="text-xs sm:text-sm text-gray-500 mb-1">{{ recipeIngredient.quantite }}</div>
+                                                {% endif %}
+                                                <div class="text-sm sm:text-base font-medium text-gray-800 break-words">{{ ingredient.nom }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    {# Message si aucun ingrédient #}
+                    <div class="mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-gray-200">
+                        <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-dark-blue mb-4 sm:mb-6">Ingrédients</h2>
+                        <div class="bg-gray-50 rounded-lg p-4 sm:p-6 text-center">
+                            <p class="text-gray-500 text-sm sm:text-base">Aucun ingrédient associé à cette recette</p>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {# Description #}
+                {% if recipe.description %}
+                    <div class="mt-6 sm:mt-8">
+                        <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-dark-blue mb-4 sm:mb-6">Description</h2>
+                        <div class="prose prose-sm sm:prose-base md:prose-lg max-w-none">
+                            <div class="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg">
+                                {% set descriptionLines = recipe.description|split('\r\n') %}
+                                {% if descriptionLines|length == 1 %}
+                                    {% set descriptionLines = recipe.description|split('\n') %}
+                                {% endif %}
+                                {% set isFirstStep = true %}
+                                {% for line in descriptionLines %}
+                                    {% set trimmedLine = line|trim %}
+                                    {% if trimmedLine != '' %}
+                                        {% if trimmedLine|slice(0, 5) == 'Étape' %}
+                                            <p class="font-semibold text-dark-blue mb-2 {% if not isFirstStep %}mt-4 sm:mt-6{% endif %} text-base sm:text-lg md:text-xl">{{ trimmedLine }}</p>
+                                            {% set isFirstStep = false %}
+                                        {% else %}
+                                            <p class="mb-3 sm:mb-4 text-gray-700">{{ trimmedLine }}</p>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

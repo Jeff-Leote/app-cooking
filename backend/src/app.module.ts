@@ -7,6 +7,7 @@ import { ShoppingItemsModule } from './shopping-items/shopping-items.module';
 import { IngredientsModule } from './ingredients/ingredients.module';
 import { PrismaService } from './prisma/prisma.service';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { StockModule } from './stock/stock.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     ShoppingItemsModule,
     IngredientsModule,
     DashboardModule,
+    StockModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

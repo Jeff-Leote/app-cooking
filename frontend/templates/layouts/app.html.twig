@@ -13,9 +13,12 @@
             {% endblock %}
 
             {# Contenu de la page #}
-            <main class="flex-1 overflow-y-auto bg-light-blue p-6">
+            <main class="flex-1 overflow-y-auto bg-light-blue p-4 sm:p-6 w-full">
                 {% block content %}{% endblock %}
             </main>
         </div>
     </div>
+
+    {# Toasts globaux (flash) #}
+    {% include 'components/toasts.html.twig' %}
 {% endblock %}

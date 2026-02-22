@@ -13,7 +13,7 @@ import { createDayColumn, createEmptyMealSlot, createFilledMealSlot } from './do
  * @param {Array} meals - Liste des repas de la semaine
  * @param {Function} onSlotClick - Callback appelé lors du clic sur un slot
  */
-export function renderWeekGrid(grid, startDate, meals, onSlotClick) {
+export function renderWeekGrid(grid, startDate, meals, onSlotClick, onDelete) {
   // Vider la grille
   while (grid.firstChild) {
     grid.removeChild(grid.firstChild);
@@ -36,7 +36,7 @@ export function renderWeekGrid(grid, startDate, meals, onSlotClick) {
     const dinnerMeal = meals.find(m => m.date === dateStr && m.type === 'dinner');
     
     if (lunchMeal) {
-      const lunchSlot = createFilledMealSlot(i, 'lunch', date, lunchMeal, onSlotClick);
+      const lunchSlot = createFilledMealSlot(i, 'lunch', date, lunchMeal, onSlotClick, onDelete);
       lunchContainer.appendChild(lunchSlot);
     } else {
       const lunchSlot = createEmptyMealSlot(i, 'lunch', date, onSlotClick);
@@ -44,7 +44,7 @@ export function renderWeekGrid(grid, startDate, meals, onSlotClick) {
     }
     
     if (dinnerMeal) {
-      const dinnerSlot = createFilledMealSlot(i, 'dinner', date, dinnerMeal, onSlotClick);
+      const dinnerSlot = createFilledMealSlot(i, 'dinner', date, dinnerMeal, onSlotClick, onDelete);
       dinnerContainer.appendChild(dinnerSlot);
     } else {
       const dinnerSlot = createEmptyMealSlot(i, 'dinner', date, onSlotClick);

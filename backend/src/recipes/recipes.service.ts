@@ -78,5 +78,40 @@ export class RecipesService {
     const args = { where: { id } };
     return this.prisma.recipe.delete(args);
   }
+
+  async addIngredients(recipeId: number, ingredients: Array<{ ingredient_id: number; quantite?: string }>) {
+    // Vérifier que la recette existe
+    await this.findOne(recipeId);
+
+    // Supprimer les ingrédients existants pour cette recette
+    await this.prisma.recipeIngredient.deleteMany({
+      where: { recipe_id: recipeId },
+    });
+
+    // Ajouter les nouveaux ingrédients
+    if (ingredients.length > 0) {
+      await this.prisma.recipeIngredient.createMany({
+        data: ingredients.map((ing) => ({
+          recipe_id: recipeId,
+          ingredient_id: ing.ingredient_id,
+          quantite: ing.quantite || null,
+        })),
+      });
+    }
+
+    // Retourner la recette avec ses ingrédients
+    return this.findOne(recipeId);
+  }
+
+  async toggleFavorite(id: number) {
+    const recipe = await this.findOne(id);
+    
+    return this.prisma.recipe.update({
+      where: { id },
+      data: {
+        is_favorite: !recipe.is_favorite,
+      },
+    });
+  }
 }
 

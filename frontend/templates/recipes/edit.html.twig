@@ -6,22 +6,19 @@
     <div class="space-y-6">
         <div class="bg-white rounded-xl shadow-sm p-8">
             <h2 class="text-2xl font-bold text-dark-blue mb-6">Modifier la recette</h2>
-            
-            {# Messages flash #}
-            {% for message in app.flashes('success') %}
-                <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-                    {{ message }}
-                </div>
-            {% endfor %}
-            
-            {% for message in app.flashes('error') %}
-                <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                    {{ message }}
-                </div>
-            {% endfor %}
-            
             {# Formulaire #}
             {{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+            
+                {# Afficher les erreurs globales du formulaire #}
+                {% if form.vars.errors|length > 0 %}
+                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                        <ul class="list-disc list-inside">
+                            {% for error in form.vars.errors %}
+                                <li>{{ error.message }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
             
                 {# Titre #}
                 <div>
@@ -74,16 +71,42 @@
                     <div id="ingredients-list" class="space-y-3">
                         {% for ingredient in form.ingredients %}
                             <div class="ingredient-item bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="space-y-4">
+                                    {# Champ de recherche d'ingrédient #}
                                     <div>
                                         {{ form_label(ingredient.ingredient_id, null, {'label_attr': {'class': 'block text-sm font-semibold text-dark-blue mb-2'}}) }}
-                                        {{ form_widget(ingredient.ingredient_id) }}
+                                        <div class="relative">
+                                            {{ form_widget(ingredient.ingredient_id) }}
+                                            <div class="ingredient-autocomplete absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 hidden max-h-60 overflow-y-auto"></div>
+                                        </div>
                                         {{ form_errors(ingredient.ingredient_id) }}
                                     </div>
-                                    <div>
-                                        {{ form_label(ingredient.quantite, null, {'label_attr': {'class': 'block text-sm font-semibold text-dark-blue mb-2'}}) }}
-                                        {{ form_widget(ingredient.quantite) }}
-                                        {{ form_errors(ingredient.quantite) }}
+                                    {# Quantité et Unité sur la même ligne #}
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            {{ form_label(ingredient.quantite, null, {'label_attr': {'class': 'block text-sm font-semibold text-dark-blue mb-2'}}) }}
+                                            <div class="relative" style="position: relative;">
+                                                {{ form_widget(ingredient.quantite, {'attr': {'class': 'quantity-input w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent', 'style': 'padding-right: 3rem !important;'}}) }}
+                                                <div class="absolute inset-y-0 right-0 flex flex-col border-l border-gray-300 rounded-r-lg pointer-events-none" style="position: absolute; top: 0; right: 0; bottom: 0; display: flex; flex-direction: column; border-left: 1px solid #d1d5db; border-radius: 0 0.5rem 0.5rem 0; pointer-events: none; z-index: 10;">
+                                                    <button type="button" class="quantity-increment flex-1 px-2 text-gray-600 hover:text-dark-blue hover:bg-gray-100 rounded-tr-lg transition-colors pointer-events-auto" aria-label="Augmenter" style="display: flex; align-items: center; justify-content: center; background-color: white; cursor: pointer; pointer-events: auto; z-index: 11;">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1rem; height: 1rem; display: block;">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                                        </svg>
+                                                    </button>
+                                                    <button type="button" class="quantity-decrement flex-1 px-2 text-gray-600 hover:text-dark-blue hover:bg-gray-100 rounded-br-lg transition-colors pointer-events-auto" aria-label="Diminuer" style="display: flex; align-items: center; justify-content: center; background-color: white; cursor: pointer; pointer-events: auto; z-index: 11;">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1rem; height: 1rem; display: block;">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            {{ form_errors(ingredient.quantite) }}
+                                        </div>
+                                        <div>
+                                            {{ form_label(ingredient.unite, null, {'label_attr': {'class': 'block text-sm font-semibold text-dark-blue mb-2'}}) }}
+                                            {{ form_widget(ingredient.unite) }}
+                                            {{ form_errors(ingredient.unite) }}
+                                        </div>
                                     </div>
                                 </div>
                                 <button type="button" class="mt-2 text-red-600 hover:text-red-800 text-sm font-semibold remove-ingredient-btn">
@@ -117,36 +140,141 @@
             const addBtn = document.getElementById('add-ingredient-btn');
             const ingredientsList = document.getElementById('ingredients-list');
             const prototype = document.getElementById('ingredient-prototype');
-            let ingredientIndex = ingredientsList.children.length;
+            
+            // Compter les ingrédients existants pour déterminer l'index de départ
+            let ingredientIndex = ingredientsList.querySelectorAll('.ingredient-item').length;
             
             function addIngredient() {
+                if (!prototype || !prototype.dataset.prototype) {
+                    console.error('Prototype non trouvé');
+                    return;
+                }
+                
                 const prototypeHtml = prototype.dataset.prototype;
+                // Remplacer __name__ par l'index pour que Symfony reconnaisse le champ
                 const newForm = prototypeHtml.replace(/__name__/g, ingredientIndex);
                 
                 const ingredientDiv = document.createElement('div');
                 ingredientDiv.className = 'ingredient-item bg-gray-50 p-4 rounded-lg border border-gray-200';
+                ingredientDiv.dataset.index = ingredientIndex;
                 
                 const contentDiv = document.createElement('div');
-                contentDiv.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
+                contentDiv.className = 'space-y-4';
                 contentDiv.innerHTML = newForm;
                 
-                const select = contentDiv.querySelector('select');
-                const quantityInput = contentDiv.querySelector('input[type="text"]');
-                
-                if (select) {
-                    select.className = 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent';
-                    const label = document.createElement('label');
-                    label.className = 'block text-sm font-semibold text-dark-blue mb-2';
-                    label.textContent = 'Ingrédient';
-                    select.parentNode.insertBefore(label, select);
+                // Ajouter le conteneur d'autocomplete pour le champ de recherche
+                const ingredientInput = contentDiv.querySelector('.ingredient-search-input');
+                if (ingredientInput) {
+                    const inputContainer = ingredientInput.parentElement;
+                    if (!inputContainer.classList.contains('relative')) {
+                        inputContainer.classList.add('relative');
+                    }
+                    const autocompleteDiv = document.createElement('div');
+                    autocompleteDiv.className = 'ingredient-autocomplete absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 hidden max-h-60 overflow-y-auto';
+                    inputContainer.appendChild(autocompleteDiv);
                 }
                 
-                if (quantityInput) {
-                    quantityInput.className = 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent';
-                    const label = document.createElement('label');
+                // Initialiser l'autocomplete pour le nouveau champ
+                if (ingredientInput && window.initIngredientAutocomplete) {
+                    window.initIngredientAutocomplete(ingredientInput);
+                }
+                
+                // Ajouter un champ caché pour l'ID de l'ingrédient
+                const hiddenIdInput = document.createElement('input');
+                hiddenIdInput.type = 'hidden';
+                hiddenIdInput.name = ingredientInput.name.replace('[ingredient_id]', '[ingredient_id]');
+                hiddenIdInput.id = ingredientInput.id + '_hidden';
+                hiddenIdInput.className = 'ingredient-id-hidden';
+                ingredientInput.parentElement.appendChild(hiddenIdInput);
+                
+                // Mettre à jour le champ caché quand un ingrédient est sélectionné
+                ingredientInput.addEventListener('change', function() {
+                    const ingredientId = this.dataset.ingredientId || '';
+                    hiddenIdInput.value = ingredientId;
+                });
+                
+                // Ajuster les classes des labels
+                contentDiv.querySelectorAll('label').forEach(label => {
                     label.className = 'block text-sm font-semibold text-dark-blue mb-2';
-                    label.textContent = 'Quantité';
-                    quantityInput.parentNode.insertBefore(label, quantityInput);
+                });
+                
+                // Ajuster les classes des champs
+                const quantityInput = contentDiv.querySelector('input[type="number"]');
+                const uniteSelect = contentDiv.querySelector('select');
+                
+                if (quantityInput) {
+                    // Créer le conteneur avec les boutons spinner
+                    const quantityContainer = document.createElement('div');
+                    quantityContainer.className = 'relative';
+                    
+                    // Déplacer l'input dans le conteneur
+                    quantityInput.className = 'quantity-input w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent';
+                    quantityInput.parentNode.insertBefore(quantityContainer, quantityInput);
+                    quantityContainer.appendChild(quantityInput);
+                    
+                    // Créer les boutons spinner
+                    const spinnerContainer = document.createElement('div');
+                    spinnerContainer.className = 'absolute inset-y-0 right-0 flex flex-col border-l border-gray-300 rounded-r-lg';
+                    
+                    const incrementBtn = document.createElement('button');
+                    incrementBtn.type = 'button';
+                    incrementBtn.className = 'quantity-increment flex-1 px-2 text-gray-600 hover:text-dark-blue hover:bg-gray-100 rounded-tr-lg transition-colors';
+                    incrementBtn.setAttribute('aria-label', 'Augmenter');
+                    incrementBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" /></svg>';
+                    incrementBtn.addEventListener('click', function() {
+                        const currentValue = parseFloat(quantityInput.value) || 0;
+                        const step = parseFloat(quantityInput.step) || 0.01;
+                        quantityInput.value = (currentValue + step).toFixed(2).replace(/\.?0+$/, '');
+                        quantityInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+                    
+                    const decrementBtn = document.createElement('button');
+                    decrementBtn.type = 'button';
+                    decrementBtn.className = 'quantity-decrement flex-1 px-2 text-gray-600 hover:text-dark-blue hover:bg-gray-100 rounded-br-lg transition-colors';
+                    decrementBtn.setAttribute('aria-label', 'Diminuer');
+                    decrementBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>';
+                    decrementBtn.addEventListener('click', function() {
+                        const currentValue = parseFloat(quantityInput.value) || 0;
+                        const step = parseFloat(quantityInput.step) || 0.01;
+                        const min = parseFloat(quantityInput.min) || 0;
+                        const newValue = Math.max(min, currentValue - step);
+                        quantityInput.value = newValue.toFixed(2).replace(/\.?0+$/, '');
+                        quantityInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+                    
+                    spinnerContainer.appendChild(incrementBtn);
+                    spinnerContainer.appendChild(decrementBtn);
+                    quantityContainer.appendChild(spinnerContainer);
+                    
+                    // Empêcher la saisie de caractères non numériques
+                    quantityInput.addEventListener('keydown', function(e) {
+                        // Autoriser: backspace, delete, tab, escape, enter, point, virgule, et les touches de navigation
+                        if ([46, 8, 9, 27, 13, 110, 190, 188].indexOf(e.keyCode) !== -1 ||
+                            // Autoriser: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                            (e.keyCode === 65 && e.ctrlKey === true) ||
+                            (e.keyCode === 67 && e.ctrlKey === true) ||
+                            (e.keyCode === 86 && e.ctrlKey === true) ||
+                            (e.keyCode === 88 && e.ctrlKey === true) ||
+                            // Autoriser: home, end, left, right, down, up
+                            (e.keyCode >= 35 && e.keyCode <= 40)) {
+                            return;
+                        }
+                        // S'assurer que c'est un nombre et empêcher la saisie si ce n'est pas le cas
+                        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                            e.preventDefault();
+                        }
+                    });
+                    // Empêcher le collage de texte non numérique
+                    quantityInput.addEventListener('paste', function(e) {
+                        const paste = (e.clipboardData || window.clipboardData).getData('text');
+                        if (!/^\d*\.?\d*$/.test(paste)) {
+                            e.preventDefault();
+                        }
+                    });
+                }
+                
+                if (uniteSelect) {
+                    uniteSelect.className = 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent';
                 }
                 
                 ingredientDiv.appendChild(contentDiv);
@@ -157,11 +285,32 @@
                 removeBtn.textContent = 'Supprimer';
                 removeBtn.addEventListener('click', function() {
                     ingredientDiv.remove();
+                    updateIndices();
                 });
                 ingredientDiv.appendChild(removeBtn);
                 
                 ingredientsList.appendChild(ingredientDiv);
                 ingredientIndex++;
+            }
+            
+            function updateIndices() {
+                const items = ingredientsList.querySelectorAll('.ingredient-item');
+                items.forEach((item, index) => {
+                    const ingredientInput = item.querySelector('.ingredient-search-input');
+                    const hiddenIdInput = item.querySelector('.ingredient-id-hidden');
+                    const quantityInput = item.querySelector('input[type="number"]');
+                    const uniteSelect = item.querySelector('select');
+                    
+                    [ingredientInput, hiddenIdInput, quantityInput, uniteSelect].forEach(field => {
+                        if (field) {
+                            const oldName = field.name;
+                            const newName = oldName.replace(/\[\d+\]/, '[' + index + ']');
+                            field.name = newName;
+                            field.id = field.id.replace(/_\d+_/, '_' + index + '_');
+                        }
+                    });
+                });
+                ingredientIndex = items.length;
             }
             
             if (addBtn) {
@@ -171,8 +320,160 @@
             document.querySelectorAll('.remove-ingredient-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     this.closest('.ingredient-item').remove();
+                    updateIndices();
                 });
             });
+            
+            // Initialiser l'autocomplete pour les ingrédients existants
+            if (window.initAllIngredientAutocompletes) {
+                window.initAllIngredientAutocompletes();
+            }
+            
+            // Ajouter les champs cachés pour les ingrédients existants
+            document.querySelectorAll('.ingredient-search-input').forEach(input => {
+                if (!input.parentElement.querySelector('.ingredient-id-hidden')) {
+                    const hiddenIdInput = document.createElement('input');
+                    hiddenIdInput.type = 'hidden';
+                    hiddenIdInput.name = input.name;
+                    hiddenIdInput.id = input.id + '_hidden';
+                    hiddenIdInput.className = 'ingredient-id-hidden';
+                    hiddenIdInput.value = input.dataset.ingredientId || '';
+                    input.parentElement.appendChild(hiddenIdInput);
+                    
+                    input.addEventListener('change', function() {
+                        hiddenIdInput.value = this.dataset.ingredientId || '';
+                    });
+                }
+            });
+            
+            // Appliquer les restrictions de saisie et les spinners aux champs quantité existants
+            document.querySelectorAll('input[type="number"]').forEach(quantityInput => {
+                if (quantityInput.name && quantityInput.name.includes('[quantite]')) {
+                    // Vérifier si le spinner existe déjà (dans le HTML statique)
+                    const existingIncrement = quantityInput.parentElement.querySelector('.quantity-increment');
+                    const existingDecrement = quantityInput.parentElement.querySelector('.quantity-decrement');
+                    
+                    // Si les boutons existent déjà, ajouter les événements
+                    if (existingIncrement && existingDecrement) {
+                        existingIncrement.addEventListener('click', function() {
+                            const currentValue = parseFloat(quantityInput.value) || 0;
+                            const step = parseFloat(quantityInput.step) || 0.01;
+                            quantityInput.value = (currentValue + step).toFixed(2).replace(/\.?0+$/, '');
+                            quantityInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        });
+                        
+                        existingDecrement.addEventListener('click', function() {
+                            const currentValue = parseFloat(quantityInput.value) || 0;
+                            const step = parseFloat(quantityInput.step) || 0.01;
+                            const min = parseFloat(quantityInput.min) || 0;
+                            const newValue = Math.max(min, currentValue - step);
+                            quantityInput.value = newValue.toFixed(2).replace(/\.?0+$/, '');
+                            quantityInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        });
+                    } else if (!existingIncrement) {
+                        // Si les boutons n'existent pas, les créer
+                        // Créer le conteneur avec les boutons spinner
+                        const quantityContainer = document.createElement('div');
+                        quantityContainer.className = 'relative';
+                        
+                        // Déplacer l'input dans le conteneur
+                        quantityInput.className = 'quantity-input w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent';
+                        quantityInput.parentNode.insertBefore(quantityContainer, quantityInput);
+                        quantityContainer.appendChild(quantityInput);
+                        
+                        // Créer les boutons spinner
+                        const spinnerContainer = document.createElement('div');
+                        spinnerContainer.className = 'absolute inset-y-0 right-0 flex flex-col border-l border-gray-300 rounded-r-lg';
+                        
+                        const incrementBtn = document.createElement('button');
+                        incrementBtn.type = 'button';
+                        incrementBtn.className = 'quantity-increment flex-1 px-2 text-gray-600 hover:text-dark-blue hover:bg-gray-100 rounded-tr-lg transition-colors';
+                        incrementBtn.setAttribute('aria-label', 'Augmenter');
+                        incrementBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" /></svg>';
+                        incrementBtn.addEventListener('click', function() {
+                            const currentValue = parseFloat(quantityInput.value) || 0;
+                            const step = parseFloat(quantityInput.step) || 0.01;
+                            quantityInput.value = (currentValue + step).toFixed(2).replace(/\.?0+$/, '');
+                            quantityInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        });
+                        
+                        const decrementBtn = document.createElement('button');
+                        decrementBtn.type = 'button';
+                        decrementBtn.className = 'quantity-decrement flex-1 px-2 text-gray-600 hover:text-dark-blue hover:bg-gray-100 rounded-br-lg transition-colors';
+                        decrementBtn.setAttribute('aria-label', 'Diminuer');
+                        decrementBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>';
+                        decrementBtn.addEventListener('click', function() {
+                            const currentValue = parseFloat(quantityInput.value) || 0;
+                            const step = parseFloat(quantityInput.step) || 0.01;
+                            const min = parseFloat(quantityInput.min) || 0;
+                            const newValue = Math.max(min, currentValue - step);
+                            quantityInput.value = newValue.toFixed(2).replace(/\.?0+$/, '');
+                            quantityInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        });
+                        
+                        spinnerContainer.appendChild(incrementBtn);
+                        spinnerContainer.appendChild(decrementBtn);
+                        quantityContainer.appendChild(spinnerContainer);
+                    }
+                    
+                    // Empêcher la saisie de caractères non numériques
+                    quantityInput.addEventListener('keydown', function(e) {
+                        // Autoriser: backspace, delete, tab, escape, enter, point, virgule, et les touches de navigation
+                        if ([46, 8, 9, 27, 13, 110, 190, 188].indexOf(e.keyCode) !== -1 ||
+                            // Autoriser: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                            (e.keyCode === 65 && e.ctrlKey === true) ||
+                            (e.keyCode === 67 && e.ctrlKey === true) ||
+                            (e.keyCode === 86 && e.ctrlKey === true) ||
+                            (e.keyCode === 88 && e.ctrlKey === true) ||
+                            // Autoriser: home, end, left, right, down, up
+                            (e.keyCode >= 35 && e.keyCode <= 40)) {
+                            return;
+                        }
+                        // S'assurer que c'est un nombre et empêcher la saisie si ce n'est pas le cas
+                        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                            e.preventDefault();
+                        }
+                    });
+                    // Empêcher le collage de texte non numérique
+                    quantityInput.addEventListener('paste', function(e) {
+                        const paste = (e.clipboardData || window.clipboardData).getData('text');
+                        if (!/^\d*\.?\d*$/.test(paste)) {
+                            e.preventDefault();
+                        }
+                    });
+                }
+            });
+            
+            // Combiner quantité et unité avant soumission
+            const form = document.getElementById('recipe-form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const items = ingredientsList.querySelectorAll('.ingredient-item');
+                    items.forEach((item, index) => {
+                        const quantityInput = item.querySelector('input[type="number"]');
+                        const uniteSelect = item.querySelector('select');
+                        const hiddenIdInput = item.querySelector('.ingredient-id-hidden');
+                        
+                        if (quantityInput && uniteSelect && hiddenIdInput) {
+                            const quantity = quantityInput.value || '';
+                            const unite = uniteSelect.value || '';
+                            const combined = unite ? `${quantity} ${unite}`.trim() : quantity;
+                            
+                            // Mettre à jour le champ quantite avec la valeur combinée
+                            const quantiteField = item.querySelector('input[name*="[quantite]"]');
+                            if (quantiteField) {
+                                quantiteField.value = combined;
+                            }
+                            
+                            // Mettre à jour le champ ingredient_id avec l'ID caché
+                            const ingredientIdField = item.querySelector('input[name*="[ingredient_id]"]');
+                            if (ingredientIdField && hiddenIdInput.value) {
+                                ingredientIdField.value = hiddenIdInput.value;
+                            }
+                        }
+                    });
+                });
+            }
         });
     </script>
 {% endblock %}

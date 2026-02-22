@@ -1,0 +1,106 @@
+{% extends 'layouts/app.html.twig' %}
+
+{% block header %}
+    {% embed 'components/header.html.twig' %}
+        {% block page_title %}Liste de courses{% endblock %}
+        
+        {% block page_subtitle %}
+            <p class="text-sm text-gray-500 mt-1" id="shopping-count">
+                <span id="shopping-count-number">0</span> article(s) à acheter
+            </p>
+        {% endblock %}
+
+        {% block header_actions %}
+            <button 
+                id="add-shopping-item-btn"
+                class="inline-flex items-center justify-center gap-2 bg-primary-green text-white font-semibold px-4 py-2 rounded-lg hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Ajouter</span>
+            </button>
+        {% endblock %}
+    {% endembed %}
+{% endblock %}
+
+{% block content %}
+    <div class="space-y-6">
+        {# Formulaire d'ajout (caché par défaut) #}
+        <div id="add-item-form" class="hidden bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-xl font-bold text-dark-blue mb-4">Ajouter un article</h2>
+            <form id="new-shopping-item-form" class="space-y-4">
+                <div>
+                    <label for="item-name" class="block text-sm font-semibold text-dark-blue mb-2">Nom de l'article</label>
+                    <input
+                        type="text"
+                        id="item-name"
+                        name="nom"
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent"
+                        placeholder="Ex: Lait, Pain, Tomates..."
+                    >
+                </div>
+                <div>
+                    <label for="item-quantity" class="block text-sm font-semibold text-dark-blue mb-2">Quantité (optionnel)</label>
+                    <input
+                        type="text"
+                        id="item-quantity"
+                        name="quantite"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent"
+                        placeholder="Ex: 1L, 500g, 3 pièces..."
+                    >
+                </div>
+                <div class="flex gap-3">
+                    <button
+                        type="submit"
+                        class="flex-1 bg-primary-green text-white font-semibold px-4 py-2 rounded-lg hover:bg-opacity-90 transition-all duration-200"
+                    >
+                        Ajouter
+                    </button>
+                    <button
+                        type="button"
+                        id="cancel-add-item-btn"
+                        class="flex-1 bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg hover:bg-gray-300 transition-all duration-200"
+                    >
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {# Liste des articles #}
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-dark-blue">Articles à acheter</h2>
+                <div class="flex items-center gap-3">
+                    <button
+                        id="validate-checked-btn"
+                        class="hidden inline-flex items-center gap-2 bg-primary-green text-white font-semibold px-4 py-2 rounded-lg hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Valider</span>
+                    </button>
+                    <button
+                        id="clear-checked-btn"
+                        class="text-sm text-red-600 hover:text-red-800 font-semibold"
+                    >
+                        Supprimer les articles cochés
+                    </button>
+                </div>
+            </div>
+            <div id="shopping-list-container" class="space-y-3">
+                {# Les articles seront chargés dynamiquement via JavaScript #}
+            </div>
+            <div id="shopping-empty" class="hidden text-center py-12">
+                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <p class="text-gray-500 text-lg font-semibold">Votre liste de courses est vide</p>
+                <p class="text-gray-400 text-sm mt-2">Ajoutez des articles pour commencer</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

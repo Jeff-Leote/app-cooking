@@ -1,0 +1,45 @@
+{% extends 'layouts/app.html.twig' %}
+
+{% block header %}
+    {% embed 'components/header.html.twig' %}
+        {% block page_title %}Favoris{% endblock %}
+        
+        {% block page_subtitle %}
+            <p class="text-sm text-gray-500 mt-1" id="favorites-count">
+                <span id="favorites-count-number">0</span> recette(s) favorite(s)
+            </p>
+        {% endblock %}
+
+        {% block header_search %}
+            <div class="relative w-full md:col-start-2 md:justify-self-center">
+                <input
+                    type="text"
+                    id="favorite-search"
+                    placeholder="Rechercher une recette..."
+                    class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent"
+                >
+                <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+        {% endblock %}
+    {% endembed %}
+{% endblock %}
+
+{% block content %}
+    <div class="space-y-6">
+        {# Grille des recettes favorites #}
+        <div id="favorites-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            {# Les recettes seront chargées dynamiquement via JavaScript #}
+        </div>
+
+        {# Message si aucune recette favorite #}
+        <div id="favorites-empty" class="hidden bg-white rounded-xl shadow-sm p-12 text-center">
+            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            <p class="text-gray-500 text-lg font-semibold">Aucune recette favorite</p>
+            <p class="text-gray-400 text-sm mt-2">Ajoutez des recettes à vos favoris pour les retrouver facilement</p>
+        </div>
+    </div>
+{% endblock %}

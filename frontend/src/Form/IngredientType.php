@@ -3,8 +3,8 @@
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -31,39 +31,26 @@ class IngredientType extends AbstractType
                     ]),
                 ],
             ])
-            ->add('sans_lactose', CheckboxType::class, [
-                'label' => 'Sans lactose',
+            ->add('categorie', ChoiceType::class, [
+                'label' => 'Catégorie alimentaire',
                 'required' => false,
-                'attr' => [
-                    'class' => 'w-4 h-4 text-primary-green border-gray-300 rounded focus:ring-primary-green',
+                'placeholder' => '— Sélectionner —',
+                'choices' => [
+                    'Féculents' => 'FECULENTS',
+                    'Protéines' => 'PROTEINES',
+                    'Légumes' => 'LEGUMES',
+                    'Fruits' => 'FRUITS',
+                    'Produits laitiers' => 'PRODUITS_LAITIERS',
+                    'Matières grasses' => 'MATIERES_GRASSES',
+                    'Céréales' => 'CEREALES',
+                    'Oléagineux' => 'OLEAGINEUX',
+                    'Produits sucrés' => 'PRODUITS_SUCRES',
+                    'Produits salés' => 'PRODUITS_SALES',
+                    'Boissons' => 'BOISSONS',
+                    'Épices et condiments' => 'EPICES_CONDIMENTS',
                 ],
-            ])
-            ->add('sans_gluten', CheckboxType::class, [
-                'label' => 'Sans gluten',
-                'required' => false,
                 'attr' => [
-                    'class' => 'w-4 h-4 text-primary-green border-gray-300 rounded focus:ring-primary-green',
-                ],
-            ])
-            ->add('riche_proteines', CheckboxType::class, [
-                'label' => 'Riche en protéines',
-                'required' => false,
-                'attr' => [
-                    'class' => 'w-4 h-4 text-primary-green border-gray-300 rounded focus:ring-primary-green',
-                ],
-            ])
-            ->add('riche_fibres', CheckboxType::class, [
-                'label' => 'Riche en fibres',
-                'required' => false,
-                'attr' => [
-                    'class' => 'w-4 h-4 text-primary-green border-gray-300 rounded focus:ring-primary-green',
-                ],
-            ])
-            ->add('riche_vitamines', CheckboxType::class, [
-                'label' => 'Riche en vitamines',
-                'required' => false,
-                'attr' => [
-                    'class' => 'w-4 h-4 text-primary-green border-gray-300 rounded focus:ring-primary-green',
+                    'class' => 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent',
                 ],
             ])
             ->add('submit', SubmitType::class, [

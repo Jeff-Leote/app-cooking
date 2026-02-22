@@ -58,6 +58,44 @@
 
 {% block content %}
     <div class="space-y-6">
+        {# Navigation de la semaine #}
+        <div class="bg-white rounded-xl shadow-sm p-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <h2 id="planning-week-navigation-title" class="text-lg sm:text-xl font-bold text-dark-blue">
+                    Semaine du 22-28 Janvier 2024
+                </h2>
+                
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <button 
+                        id="planning-prev-week"
+                        class="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                        aria-label="Semaine précédente"
+                    >
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    
+                    <button 
+                        id="planning-today"
+                        class="px-3 sm:px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm sm:text-base font-semibold hover:bg-gray-200 transition-colors"
+                    >
+                        Aujourd'hui
+                    </button>
+                    
+                    <button 
+                        id="planning-next-week"
+                        class="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                        aria-label="Semaine suivante"
+                    >
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         {# Section Planning de la semaine #}
         <div class="bg-white rounded-xl shadow-sm p-6">
             <h2 class="text-xl font-bold text-dark-blue mb-6">Planning de la semaine</h2>

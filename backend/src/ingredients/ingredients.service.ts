@@ -16,11 +16,7 @@ export class IngredientsService {
 
   async findAll(filters?: {
     search?: string;
-    sans_lactose?: boolean;
-    sans_gluten?: boolean;
-    riche_proteines?: boolean;
-    riche_fibres?: boolean;
-    riche_vitamines?: boolean;
+    categorie?: Prisma.IngredientWhereInput['categorie'];
   }) {
     const where: Prisma.IngredientWhereInput = {};
 
@@ -28,19 +24,9 @@ export class IngredientsService {
       where.nom = { contains: filters.search };
     }
 
-    const nutritionalProps: Array<keyof Prisma.IngredientWhereInput> = [
-      'sans_lactose',
-      'sans_gluten',
-      'riche_proteines',
-      'riche_fibres',
-      'riche_vitamines',
-    ];
-
-    nutritionalProps.forEach((prop) => {
-      if ((filters as any)?.[prop] === true) {
-        (where as any)[prop] = true;
-      }
-    });
+    if (filters?.categorie) {
+      where.categorie = filters.categorie;
+    }
 
     return this.prisma.ingredient.findMany({
       where: where,

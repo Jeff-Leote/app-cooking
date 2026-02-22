@@ -184,7 +184,7 @@ body {
 
 /* Page Calendrier */
 .calendar-day {
-  @apply bg-white border border-gray-200 rounded-lg p-3 min-h-[100px] transition-all duration-200 hover:shadow-md cursor-pointer;
+  @apply bg-white border border-gray-200 rounded-lg p-3 min-h-[100px] transition-all duration-200 hover:shadow-md cursor-pointer overflow-hidden relative;
 }
 
 .calendar-day.today {
@@ -204,11 +204,11 @@ body {
 }
 
 .calendar-day__meals {
-  @apply space-y-1;
+  @apply space-y-1 max-w-full;
 }
 
 .calendar-meal {
-  @apply text-xs px-2 py-1 rounded font-medium truncate;
+  @apply text-xs px-2 py-1 rounded font-medium truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap;
 }
 
 .calendar-meal--lunch {
@@ -220,7 +220,7 @@ body {
 }
 
 .calendar-day__add {
-  @apply w-full h-full flex items-center justify-center text-gray-300 hover:text-primary-green transition-colors;
+  @apply absolute inset-0 flex items-center justify-center text-gray-300 hover:text-primary-green transition-colors pointer-events-none;
 }
 
 /* Responsive (mobile) - Header & pages Calendrier/Planification */
@@ -318,6 +318,18 @@ body {
   @apply flex items-center gap-1;
 }
 
+.planning-meal-card {
+  @apply relative;
+}
+
+.planning-meal-card__delete {
+  @apply absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 transition-opacity duration-200 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 z-10;
+}
+
+.planning-edit-mode .planning-meal-card__delete {
+  @apply opacity-100;
+}
+
 /* Mode édition de la planification */
 .planning-edit-mode .planning-meal-slot--empty {
   @apply cursor-pointer border-primary-green/50;
@@ -334,4 +346,45 @@ body {
 
 #planning-week-modal .bg-white {
   @apply rounded-lg shadow-xl;
+}
+
+/* Spinner pour les champs quantité */
+.quantity-input {
+  padding-right: 3rem !important;
+}
+
+/* S'assurer que les boutons spinner sont visibles */
+.quantity-increment,
+.quantity-decrement {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 10 !important;
+  background-color: white !important;
+  cursor: pointer !important;
+  min-height: 50% !important;
+}
+
+.quantity-increment:hover,
+.quantity-decrement:hover {
+  background-color: #f3f4f6 !important;
+}
+
+.quantity-increment svg,
+.quantity-decrement svg {
+  width: 1rem !important;
+  height: 1rem !important;
+  display: block !important;
+  pointer-events: none;
+}
+
+/* S'assurer que le conteneur des boutons est visible */
+div.relative > div.absolute.inset-y-0.right-0.flex.flex-col {
+  display: flex !important;
+  flex-direction: column !important;
+  pointer-events: none !important;
+}
+
+div.relative > div.absolute.inset-y-0.right-0.flex.flex-col > button {
+  pointer-events: auto !important;
 }

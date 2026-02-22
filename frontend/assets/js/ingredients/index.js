@@ -19,16 +19,63 @@ function buildApiItemUrl(resource, id) {
   return url.toString();
 }
 
+function getCategoryActiveClasses(categoryKey) {
+  if (!categoryKey || categoryKey === 'all' || !CATEGORY_CONFIG[categoryKey]) {
+    return { bg: 'bg-primary-green', text: 'text-white' };
+  }
+  const config = CATEGORY_CONFIG[categoryKey];
+  // Version plus foncée pour l'état actif
+  const activeBg = config.bg.replace(/-100$/, '-500').replace(/-200$/, '-600');
+  return { bg: activeBg, text: 'text-white' };
+}
+
+function getCategoryBaseClasses(categoryKey) {
+  if (!categoryKey || categoryKey === 'all' || !CATEGORY_CONFIG[categoryKey]) {
+    return { bg: 'bg-white', text: 'text-gray-700' };
+  }
+  const config = CATEGORY_CONFIG[categoryKey];
+  return { bg: config.bg, text: config.text };
+}
+
+function applyCategoryColorsToFilters() {
+  const filterButtons = document.querySelectorAll('.ingredient-filter-btn');
+  filterButtons.forEach((btn) => {
+    const filterValue = btn.dataset.filter;
+    const baseClasses = getCategoryBaseClasses(filterValue);
+    // Nettoyer les classes de couleur existantes
+    btn.className = btn.className.replace(/bg-\w+-\d+|text-\w+-\d+/g, '').trim();
+    // Ajouter les nouvelles classes
+    btn.classList.add(baseClasses.bg, baseClasses.text, 'border-transparent');
+  });
+}
+
 function setupFilters(container, state, loadIngredients) {
   const filterButtons = document.querySelectorAll('.ingredient-filter-btn');
   if (filterButtons.length === 0) {
     return;
   }
+
+  // Appliquer les couleurs aux boutons au chargement
+  applyCategoryColorsToFilters();
+
   filterButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
-      filterButtons.forEach((b) => b.classList.remove('active-filter'));
-      btn.classList.add('active-filter');
-      state.currentFilter = btn.dataset.filter || 'all';
+      // Réinitialiser tous les boutons
+      filterButtons.forEach((b) => {
+        b.classList.remove('active-filter');
+        const filterValue = b.dataset.filter;
+        const baseClasses = getCategoryBaseClasses(filterValue);
+        b.className = b.className.replace(/bg-\w+-\d+|text-\w+-\d+/g, '').trim();
+        b.classList.add('ingredient-filter-btn', 'px-4', 'py-2', 'rounded-lg', 'font-semibold', 'text-sm', 'transition-all', 'duration-200', baseClasses.bg, baseClasses.text, 'border-transparent');
+      });
+      
+      // Appliquer le style actif au bouton sélectionné
+      const filterValue = btn.dataset.filter;
+      const activeClasses = getCategoryActiveClasses(filterValue);
+      btn.className = btn.className.replace(/bg-\w+-\d+|text-\w+-\d+/g, '').trim();
+      btn.classList.add('ingredient-filter-btn', 'px-4', 'py-2', 'rounded-lg', 'font-semibold', 'text-sm', 'transition-all', 'duration-200', activeClasses.bg, activeClasses.text, 'border-transparent', 'active-filter');
+      
+      state.currentFilter = filterValue || 'all';
       void loadIngredients().catch((err) => console.error('Erreur loadIngredients:', err));
     });
   });
@@ -74,17 +121,8 @@ function buildApiUrl(state) {
     params.append('search', state.searchQuery);
   }
   if (state.currentFilter !== 'all') {
-    const filterMapping = {
-      lactose: 'sans_lactose',
-      gluten: 'sans_gluten',
-      proteines: 'riche_proteines',
-      fibres: 'riche_fibres',
-      vitamines: 'riche_vitamines',
-    };
-    const filterParam = filterMapping[state.currentFilter];
-    if (filterParam) {
-      params.append(filterParam, 'true');
-    }
+    // Catégorie alimentaire (enum Prisma)
+    params.append('categorie', state.currentFilter);
   }
   const queryString = params.toString();
   if (queryString) {
@@ -173,25 +211,34 @@ function createLoadingState() {
   return loadingDiv;
 }
 
-function createIngredientBadges(ingredient) {
-  const badges = [
-    { prop: 'sans_lactose', label: 'Sans lactose', className: 'px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold' },
-    { prop: 'sans_gluten', label: 'Sans gluten', className: 'px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold' },
-    { prop: 'riche_proteines', label: 'Riche en protéines', className: 'px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold' },
-    { prop: 'riche_fibres', label: 'Riche en fibres', className: 'px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-semibold' },
-    { prop: 'riche_vitamines', label: 'Riche en vitamines', className: 'px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold' },
-  ];
+// Mapping des catégories avec leurs labels et couleurs
+const CATEGORY_CONFIG = {
+  FECULENTS: { label: 'Féculents', bg: 'bg-amber-100', text: 'text-amber-800' },
+  PROTEINES: { label: 'Protéines', bg: 'bg-red-100', text: 'text-red-800' },
+  LEGUMES: { label: 'Légumes', bg: 'bg-green-100', text: 'text-green-800' },
+  FRUITS: { label: 'Fruits', bg: 'bg-orange-100', text: 'text-orange-800' },
+  PRODUITS_LAITIERS: { label: 'Produits laitiers', bg: 'bg-blue-100', text: 'text-blue-800' },
+  MATIERES_GRASSES: { label: 'Matières grasses', bg: 'bg-yellow-100', text: 'text-yellow-800' },
+  CEREALES: { label: 'Céréales', bg: 'bg-amber-200', text: 'text-amber-900' },
+  OLEAGINEUX: { label: 'Oléagineux', bg: 'bg-yellow-200', text: 'text-yellow-900' },
+  PRODUITS_SUCRES: { label: 'Produits sucrés', bg: 'bg-pink-100', text: 'text-pink-800' },
+  PRODUITS_SALES: { label: 'Produits salés', bg: 'bg-gray-100', text: 'text-gray-800' },
+  BOISSONS: { label: 'Boissons', bg: 'bg-cyan-100', text: 'text-cyan-800' },
+  EPICES_CONDIMENTS: { label: 'Épices et condiments', bg: 'bg-purple-100', text: 'text-purple-800' },
+};
 
+function createIngredientBadges(ingredient) {
   const meta = document.createElement('div');
   meta.className = 'ingredient-card__meta flex flex-wrap gap-2 mt-2';
 
-  badges.forEach(({ prop, label, className }) => {
-    if (!ingredient?.[prop]) return;
+  const cat = ingredient?.categorie;
+  const config = cat ? CATEGORY_CONFIG[String(cat)] : null;
+  if (config) {
     const badge = document.createElement('span');
-    badge.className = className;
-    badge.textContent = label;
+    badge.className = `px-2 py-1 ${config.bg} ${config.text} rounded-full text-xs font-semibold`;
+    badge.textContent = config.label;
     meta.appendChild(badge);
-  });
+  }
 
   return meta.children.length > 0 ? meta : null;
 }
@@ -299,7 +346,6 @@ function renderIngredients(container, ingredients, reloadIngredients) {
 export function initIngredientsPage() {
   const container = document.getElementById('ingredients-container');
   if (!container) {
-    console.warn('Container ingredients-container non trouvé');
     return;
   }
 

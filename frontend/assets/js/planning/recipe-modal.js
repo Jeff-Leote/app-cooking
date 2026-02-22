@@ -78,6 +78,7 @@ function createRecipeCard(recipe, ctx) {
     currentSelectedSlot,
     currentSelectedMealType,
     currentSelectedDate,
+    currentSelectedMeal,
     close,
   } = ctx || {};
 
@@ -162,7 +163,7 @@ function createRecipeCard(recipe, ctx) {
   
   card.addEventListener('click', () => {
     if (onRecipeSelect) {
-      onRecipeSelect(recipe, currentSelectedSlot, currentSelectedMealType, currentSelectedDate);
+      onRecipeSelect(recipe, currentSelectedSlot, currentSelectedMealType, currentSelectedDate, currentSelectedMeal);
     }
     close();
   });
@@ -185,6 +186,7 @@ export function initRecipeModal(onRecipeSelect) {
   let currentSelectedSlot = null;
   let currentSelectedMealType = null;
   let currentSelectedDate = null;
+  let currentSelectedMeal = null;
   let currentRecipeCategory = 'all';
   let currentRecipeSearch = '';
   
@@ -247,6 +249,7 @@ export function initRecipeModal(onRecipeSelect) {
         currentSelectedSlot,
         currentSelectedMealType,
         currentSelectedDate,
+        currentSelectedMeal,
         close,
       });
       grid.appendChild(card);
@@ -259,6 +262,7 @@ export function initRecipeModal(onRecipeSelect) {
     currentSelectedSlot = slotId;
     currentSelectedMealType = mealType;
     currentSelectedDate = date;
+    currentSelectedMeal = currentMeal || null;
     
     currentRecipeCategory = 'all';
     currentRecipeSearch = '';

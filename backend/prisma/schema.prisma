@@ -7,14 +7,14 @@ datasource db {
 }
 
 model Recipe {
-  id                Int        @id @default(autoincrement())
-  titre             String     @db.VarChar(255)
+  id                Int                @id @default(autoincrement())
+  titre             String             @db.VarChar(255)
   description       String
   temps_preparation Int?
-  image_url         String?    @db.VarChar(500)
-  is_favorite       Boolean?   @default(false)
-  created_at        DateTime?  @default(now()) @db.Timestamp(6)
-  updated_at        DateTime?  @default(now()) @updatedAt @db.Timestamp(6)
+  image_url         String?            @db.VarChar(500)
+  created_at        DateTime?          @default(now()) @db.Timestamp(6)
+  updated_at        DateTime?          @default(now()) @updatedAt @db.Timestamp(6)
+  is_favorite       Boolean?           @default(false)
   mealPlans         MealPlan[]
   recipeIngredients RecipeIngredient[]
 
@@ -25,23 +25,16 @@ model Recipe {
 }
 
 model Ingredient {
-  id                Int                @id @default(autoincrement())
+  id                Int                 @id @default(autoincrement())
   nom               String              @db.VarChar(255)
-  sans_lactose      Boolean?            @default(false)
-  sans_gluten       Boolean?            @default(false)
-  riche_proteines   Boolean?            @default(false)
-  riche_fibres      Boolean?            @default(false)
-  riche_vitamines   Boolean?            @default(false)
   created_at        DateTime?           @default(now()) @db.Timestamp(6)
   updated_at        DateTime?           @default(now()) @updatedAt @db.Timestamp(6)
+  categorie         IngredientCategory?
   recipeIngredients RecipeIngredient[]
+  stock             Stock?
 
   @@index([nom], map: "idx_ingredients_nom")
-  @@index([sans_lactose], map: "idx_ingredients_sans_lactose")
-  @@index([sans_gluten], map: "idx_ingredients_sans_gluten")
-  @@index([riche_proteines], map: "idx_ingredients_riche_proteines")
-  @@index([riche_fibres], map: "idx_ingredients_riche_fibres")
-  @@index([riche_vitamines], map: "idx_ingredients_riche_vitamines")
+  @@index([categorie], map: "idx_ingredients_categorie")
   @@map("ingredients")
 }
 
@@ -51,8 +44,8 @@ model RecipeIngredient {
   ingredient_id Int
   quantite      String?    @db.VarChar(100)
   created_at    DateTime?  @default(now()) @db.Timestamp(6)
-  recipe        Recipe     @relation(fields: [recipe_id], references: [id], onDelete: Cascade)
   ingredient    Ingredient @relation(fields: [ingredient_id], references: [id], onDelete: Cascade)
+  recipe        Recipe     @relation(fields: [recipe_id], references: [id], onDelete: Cascade)
 
   @@unique([recipe_id, ingredient_id], map: "uq_recipe_ingredient")
   @@index([recipe_id], map: "idx_recipe_ingredient_recipe")
@@ -87,4 +80,33 @@ model ShoppingItem {
   @@index([coche], map: "idx_shopping_items_coche")
   @@index([nom], map: "idx_shopping_items_nom")
   @@map("shopping_items")
+}
+
+model Stock {
+  id              Int        @id @default(autoincrement())
+  ingredient_id   Int        @unique(map: "uq_stock_ingredient")
+  quantite        String?    @db.VarChar(100)
+  date_ajout      DateTime?  @default(now()) @db.Timestamp(6)
+  date_peremption DateTime?  @db.Date
+  created_at      DateTime?  @default(now()) @db.Timestamp(6)
+  updated_at      DateTime?  @default(now()) @updatedAt @db.Timestamp(6)
+  ingredient      Ingredient @relation(fields: [ingredient_id], references: [id], onDelete: Cascade)
+
+  @@index([ingredient_id], map: "idx_stock_ingredient")
+  @@map("stock")
+}
+
+enum IngredientCategory {
+  FECULENTS
+  PROTEINES
+  LEGUMES
+  FRUITS
+  PRODUITS_LAITIERS
+  MATIERES_GRASSES
+  CEREALES
+  OLEAGINEUX
+  PRODUITS_SUCRES
+  PRODUITS_SALES
+  BOISSONS
+  EPICES_CONDIMENTS
 }

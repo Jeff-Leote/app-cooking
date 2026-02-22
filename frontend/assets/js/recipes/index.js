@@ -205,7 +205,7 @@ function createRecipeCard(recipe, reloadRecipes) {
   card.appendChild(content);
 
   card.addEventListener('click', () => {
-    window.location.href = `/recipes/${recipeId}/edit`;
+    window.location.href = `/recipes/${recipeId}`;
   });
 
   return card;

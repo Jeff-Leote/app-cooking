@@ -86,15 +86,43 @@ export function updateMonthYearTitle(monthYearEl, currentYear, currentMonth) {
  * Rend les repas dans le calendrier
  */
 export function renderMeals(meals) {
+  // Grouper les repas par date
+  const mealsByDate = {};
   meals.forEach((meal) => {
-    const dateStr = meal.date; // Format: YYYY-MM-DD
+    if (!mealsByDate[meal.date]) {
+      mealsByDate[meal.date] = [];
+    }
+    mealsByDate[meal.date].push(meal);
+  });
+
+  // Pour chaque date, trier les repas (Déjeuner avant Dîner) et les afficher
+  Object.keys(mealsByDate).forEach((dateStr) => {
     const mealEl = document.querySelector(`[data-date="${dateStr}"]`);
     if (!mealEl) return;
 
-    const mealDiv = document.createElement('div');
-    mealDiv.className = `calendar-meal calendar-meal--${meal.type}`;
-    const mealTypeLabel = meal.type === 'lunch' ? 'Déjeuner' : 'Dîner';
-    mealDiv.textContent = `${mealTypeLabel} ${meal.recipeTitle || ''}`;
-    mealEl.appendChild(mealDiv);
+    // Cacher le bouton add si un repas est ajouté
+    const dayCard = mealEl.closest('.calendar-day');
+    if (dayCard) {
+      const addBtn = dayCard.querySelector('.calendar-day__add');
+      if (addBtn) {
+        addBtn.style.display = 'none';
+      }
+    }
+
+    // Trier les repas : lunch (Déjeuner) avant dinner (Dîner)
+    const sortedMeals = mealsByDate[dateStr].sort((a, b) => {
+      if (a.type === 'lunch' && b.type === 'dinner') return -1;
+      if (a.type === 'dinner' && b.type === 'lunch') return 1;
+      return 0;
+    });
+
+    // Afficher les repas dans l'ordre trié
+    sortedMeals.forEach((meal) => {
+      const mealDiv = document.createElement('div');
+      mealDiv.className = `calendar-meal calendar-meal--${meal.type}`;
+      const mealTypeLabel = meal.type === 'lunch' ? 'Déjeuner' : 'Dîner';
+      mealDiv.textContent = `${mealTypeLabel} ${meal.recipeTitle || ''}`;
+      mealEl.appendChild(mealDiv);
+    });
   });
 }

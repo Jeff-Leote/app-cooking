@@ -72,6 +72,30 @@ export function formatWeekRange(startDate) {
   return `${startDay}-${endDay} ${month.substring(0, 3)}`;
 }
 
+/**
+ * Formate le titre complet de la semaine (ex: "Semaine du 22-28 Janvier 2024")
+ * @param {Date} startDate - Date de début de la semaine
+ * @returns {string} Titre formaté
+ */
+export function formatWeekTitle(startDate) {
+  const endDate = new Date(startDate);
+  endDate.setDate(endDate.getDate() + 6);
+  
+  const startDay = startDate.getDate();
+  const endDay = endDate.getDate();
+  const startMonth = MONTH_NAMES[startDate.getMonth()];
+  const endMonth = MONTH_NAMES[endDate.getMonth()];
+  const year = startDate.getFullYear();
+  
+  // Si la semaine est dans le même mois
+  if (startDate.getMonth() === endDate.getMonth()) {
+    return `Semaine du ${startDay}-${endDay} ${startMonth} ${year}`;
+  } else {
+    // Si la semaine s'étend sur deux mois
+    return `Semaine du ${startDay} ${startMonth.substring(0, 3)} - ${endDay} ${endMonth} ${year}`;
+  }
+}
+
 // ============================================
 // Fonctions utilitaires de date
 // ============================================

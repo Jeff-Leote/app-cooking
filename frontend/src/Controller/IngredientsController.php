@@ -15,6 +15,19 @@ class IngredientsController extends AbstractController
         private readonly HttpClientInterface $httpClient
     ) {
     }
+
+    private function filterIngredientPayload(array $data): array
+    {
+        // Ne jamais envoyer des champs non attendus par le backend (DTO whitelist)
+        $payload = array_intersect_key($data, array_flip(['nom', 'categorie']));
+
+        // ChoiceType renvoie souvent '' quand rien n'est sélectionné -> on l'enlève
+        if (array_key_exists('categorie', $payload) && ($payload['categorie'] === '' || $payload['categorie'] === null)) {
+            unset($payload['categorie']);
+        }
+
+        return $payload;
+    }
     
     private function getBackendUrl(): string
     {
@@ -38,8 +51,12 @@ class IngredientsController extends AbstractController
 
         $form->handleRequest($request);
 
+        if ($form->isSubmitted() && !$form->isValid()) {
+            $this->addFlash('error', 'Formulaire invalide. Vérifiez les champs et réessayez.');
+        }
+
         if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
+            $data = $this->filterIngredientPayload($form->getData());
             
             try {
                 $backendUrl = $this->getBackendUrl();
@@ -51,10 +68,15 @@ class IngredientsController extends AbstractController
                     'timeout' => 30,
                 ]);
 
-                if ($response->getStatusCode() === 201) {
+                $statusCode = $response->getStatusCode();
+                if ($statusCode === 201) {
                     $this->addFlash('success', 'Ingrédient créé avec succès !');
                     return $this->redirectToRoute('app_ingredients');
                 }
+
+                // Afficher le message d'erreur backend au lieu de rester silencieux
+                $body = $response->getContent(false);
+                $this->addFlash('error', sprintf('Erreur backend (HTTP %d) : %s', $statusCode, $body ?: 'Réponse vide'));
             } catch (\Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface $e) {
                 $this->addFlash('error', 'Impossible de se connecter au backend. Vérifiez que le service backend est démarré.');
             } catch (\Exception $e) {
@@ -91,8 +113,12 @@ class IngredientsController extends AbstractController
 
         $form->handleRequest($request);
 
+        if ($form->isSubmitted() && !$form->isValid()) {
+            $this->addFlash('error', 'Formulaire invalide. Vérifiez les champs et réessayez.');
+        }
+
         if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
+            $data = $this->filterIngredientPayload($form->getData());
             
             try {
                 $backendUrl = $this->getBackendUrl();
@@ -104,10 +130,14 @@ class IngredientsController extends AbstractController
                     'timeout' => 30,
                 ]);
 
-                if ($response->getStatusCode() === 200) {
+                $statusCode = $response->getStatusCode();
+                if ($statusCode === 200) {
                     $this->addFlash('success', 'Ingrédient modifié avec succès !');
                     return $this->redirectToRoute('app_ingredients');
                 }
+
+                $body = $response->getContent(false);
+                $this->addFlash('error', sprintf('Erreur backend (HTTP %d) : %s', $statusCode, $body ?: 'Réponse vide'));
             } catch (\Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface $e) {
                 $this->addFlash('error', 'Impossible de se connecter au backend. Vérifiez que le service backend est démarré.');
             } catch (\Exception $e) {

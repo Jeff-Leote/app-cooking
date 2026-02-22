@@ -46,6 +46,12 @@ export class MealPlanController {
     return this.mealPlanService.update(id, updateMealPlanDto)
   }
 
+  @Post('process-past-meals')
+  @HttpCode(HttpStatus.OK)
+  processPastMeals() {
+    return this.mealPlanService.processPastMeals();
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseIntPipe) id: number) {

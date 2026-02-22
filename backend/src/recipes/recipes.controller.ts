@@ -14,6 +14,7 @@ import {
 import { RecipesService } from './recipes.service';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
+import { AddRecipeIngredientsDto } from './dto/add-recipe-ingredients.dto';
 
 @Controller('recipes')
 export class RecipesController {
@@ -34,6 +35,15 @@ export class RecipesController {
     return this.recipesService.findAll({ category, search, favorites: favorites === 'true' })
   }
 
+  @Post(':id/ingredients')
+  @HttpCode(HttpStatus.OK)
+  addIngredients(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() addRecipeIngredientsDto: AddRecipeIngredientsDto,
+  ) {
+    return this.recipesService.addIngredients(id, addRecipeIngredientsDto.ingredients)
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.recipesService.findOne(id)
@@ -45,6 +55,12 @@ export class RecipesController {
     @Body() updateRecipeDto: UpdateRecipeDto,
   ) {
     return this.recipesService.update(id, updateRecipeDto)
+  }
+
+  @Patch(':id/favorite')
+  @HttpCode(HttpStatus.OK)
+  toggleFavorite(@Param('id', ParseIntPipe) id: number) {
+    return this.recipesService.toggleFavorite(id);
   }
 
   @Delete(':id')
