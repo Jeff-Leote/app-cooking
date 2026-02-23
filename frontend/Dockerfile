@@ -3,6 +3,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY assets ./assets
+COPY templates ./templates
 COPY webpack.config.mjs postcss.config.js tailwind.config.js ./
 RUN npm run build
 
