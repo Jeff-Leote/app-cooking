@@ -14,6 +14,77 @@ if ($decodedPath === '/health' || $decodedPath === '/healthz') {
     return true;
 }
 
+// Proxy all /api/* calls to the backend service (same behavior as local nginx reverse-proxy).
+if (str_starts_with($decodedPath, '/api/')) {
+    $backendBaseUrl = rtrim(
+        $_ENV['APP_BACKEND_URL'] ?? $_SERVER['APP_BACKEND_URL'] ?? 'http://backend:3000',
+        '/'
+    );
+    $queryString = $_SERVER['QUERY_STRING'] ?? '';
+    $targetUrl = $backendBaseUrl . $decodedPath . ($queryString !== '' ? '?' . $queryString : '');
+
+    $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+    $body = file_get_contents('php://input') ?: '';
+
+    // Build request headers from $_SERVER to stay compatible with php built-in server.
+    $forwardHeaders = [];
+    foreach ($_SERVER as $key => $value) {
+        if (!str_starts_with($key, 'HTTP_') || !is_string($value)) {
+            continue;
+        }
+
+        $headerName = str_replace('_', '-', substr($key, 5));
+        if ($headerName === 'HOST' || $headerName === 'CONNECTION' || $headerName === 'CONTENT-LENGTH') {
+            continue;
+        }
+        $forwardHeaders[] = $headerName . ': ' . $value;
+    }
+
+    if (($contentType = $_SERVER['CONTENT_TYPE'] ?? null) && is_string($contentType) && $contentType !== '') {
+        $forwardHeaders[] = 'CONTENT-TYPE: ' . $contentType;
+    }
+
+    $context = stream_context_create([
+        'http' => [
+            'method' => $method,
+            'header' => implode("\r\n", $forwardHeaders),
+            'content' => $body,
+            'ignore_errors' => true,
+            'timeout' => 30,
+        ],
+    ]);
+
+    $responseBody = @file_get_contents($targetUrl, false, $context);
+    $responseHeaders = $http_response_header ?? [];
+
+    $statusCode = 502;
+    foreach ($responseHeaders as $headerLine) {
+        if (preg_match('#^HTTP/\S+\s+(\d{3})#', $headerLine, $matches)) {
+            $statusCode = (int) $matches[1];
+            break;
+        }
+    }
+    http_response_code($statusCode);
+
+    foreach ($responseHeaders as $headerLine) {
+        if (stripos($headerLine, 'HTTP/') === 0) {
+            continue;
+        }
+        // Skip hop-by-hop headers.
+        if (stripos($headerLine, 'Transfer-Encoding:') === 0 ||
+            stripos($headerLine, 'Connection:') === 0 ||
+            stripos($headerLine, 'Content-Length:') === 0) {
+            continue;
+        }
+        header($headerLine, false);
+    }
+
+    if ($responseBody !== false) {
+        echo $responseBody;
+    }
+    return true;
+}
+
 // Normalize path and guard against traversal.
 $relativePath = ltrim($decodedPath, '/');
 $candidatePath = $publicDir . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $relativePath);
