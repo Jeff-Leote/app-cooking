@@ -11,6 +11,7 @@ WORKDIR /var/www/html
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY . .
+RUN printf "APP_ENV=prod\nAPP_DEBUG=0\n" > .env
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 COPY --from=assets /app/public/build ./public/build
 
