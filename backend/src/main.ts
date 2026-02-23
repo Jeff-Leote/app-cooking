@@ -23,7 +23,7 @@ async function bootstrap() {
   );
 
   const port = process.env.PORT || DEFAULT_PORT;
-  await app.listen(port);
-  console.log(`🚀 Backend API running on: http://localhost:${process.env.PORT ?? DEFAULT_PORT}/api`);
+  await app.listen(port, '0.0.0.0');
+  console.log(`🚀 Backend API running on port ${port}/api`);
 }
 bootstrap();
