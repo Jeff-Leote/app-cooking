@@ -15,4 +15,4 @@ RUN printf "APP_ENV=prod\nAPP_DEBUG=0\n" > .env
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 COPY --from=assets /app/public/build ./public/build
 
-CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-10000} -t public public/index.php"]
+CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-10000} -t public router.php"]
