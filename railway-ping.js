@@ -15,7 +15,7 @@ const SITES = [
   'https://app-cooking.onrender.com/api/dashboard/summary'
 ];
 
-const PING_INTERVAL = 2 * 60 * 1000; // 2 minutes
+const PING_INTERVAL = 9 * 60 * 1000; // 9 minutes
 
 console.log('🚀 Démarrage du ping externe Railway...');
 console.log(`⏰ Intervalle: ${PING_INTERVAL / 1000} secondes`);
