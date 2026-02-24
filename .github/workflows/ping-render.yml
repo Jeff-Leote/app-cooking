@@ -1,0 +1,27 @@
+name: Keep Render Awake
+
+on:
+  schedule:
+    # Toutes les 9 minutes
+    - cron: "*/9 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping frontend health endpoint
+        run: |
+          echo "Pinging frontend..."
+          curl -sS -L --max-time 25 --retry 2 --retry-delay 2 --fail \
+            "https://app-cooking-1.onrender.com/healthz" \
+            -o /dev/null
+          echo "Frontend OK"
+
+      - name: Ping backend summary endpoint
+        run: |
+          echo "Pinging backend..."
+          curl -sS -L --max-time 25 --retry 2 --retry-delay 2 --fail \
+            "https://app-cooking.onrender.com/api/dashboard/summary" \
+            -o /dev/null
+          echo "Backend OK"
