@@ -2,8 +2,8 @@ name: Keep Render Awake
 
 on:
   schedule:
-    # Toutes les 9 minutes
-    - cron: "*/9 * * * *"
+    # Toutes les 5 minutes
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -13,15 +13,20 @@ jobs:
       - name: Ping frontend health endpoint
         run: |
           echo "Pinging frontend..."
-          curl -sS -L --max-time 25 --retry 2 --retry-delay 2 --fail \
+          curl -sS -L --max-time 30 --retry 3 --retry-delay 3 --fail \
             "https://app-cooking-1.onrender.com/healthz" \
             -o /dev/null
           echo "Frontend OK"
 
-      - name: Ping backend summary endpoint
+      - name: Ping backend summary endpoint (cold start tolerant)
+        continue-on-error: true
         run: |
           echo "Pinging backend..."
-          curl -sS -L --max-time 25 --retry 2 --retry-delay 2 --fail \
+          # Warm-up request (peut timeouter pendant le réveil)
+          curl -sS -L --max-time 40 "https://app-cooking.onrender.com/" -o /dev/null || true
+          sleep 20
+          # Ping API principal avec timeout/retry plus permissifs
+          curl -sS -L --max-time 120 --retry 5 --retry-delay 5 --retry-all-errors --fail \
             "https://app-cooking.onrender.com/api/dashboard/summary" \
             -o /dev/null
           echo "Backend OK"
