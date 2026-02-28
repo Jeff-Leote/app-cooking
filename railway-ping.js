@@ -10,8 +10,8 @@ const https = require('https');
 const http = require('http');
 
 // Configuration (modifiable via variables d'environnement)
-const FRONTEND_URL = process.env.FRONTEND_PING_URL || 'https://app-cooking-1.onrender.com/healthz';
-const BACKEND_URL = process.env.BACKEND_PING_URL || 'https://app-cooking.onrender.com/api/dashboard/summary';
+const FRONTEND_URL = process.env.FRONTEND_PING_URL || 'https://app-cooking-1-puk2.onrender.com/healthz';
+const BACKEND_URL = process.env.BACKEND_PING_URL || 'https://app-cooking-22fr.onrender.com/api/dashboard/summary';
 const SITES = [FRONTEND_URL, BACKEND_URL];
 const PING_INTERVAL = Number(process.env.PING_INTERVAL_MS || 5 * 60 * 1000); // 5 minutes par défaut
 
